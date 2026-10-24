@@ -1,0 +1,4310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Roomates Sheet - Mobile-first roommate expense settlement web app with exact paisa precision, optimal debt settlement, and multi-user live sharing for flatmates in Pakistan.">
+  <title>Roomates Sheet | Zero-Friction Expense Settlement</title>
+  
+  <!-- Modern Typography (Inter & Poppins with Urdu/Arabic & System fallbacks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Optional Firebase SDKs (Real-Time Cloud Synchronization & Auth) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <style>
+    /* =====================================================================
+       DESIGN SYSTEM & CSS CUSTOM PROPERTIES
+       ===================================================================== */
+    :root {
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Arabic', sans-serif;
+      --font-display: 'Poppins', var(--font-main);
+
+      /* Colors - Light Theme */
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-trans: rgba(255, 255, 255, 0.88);
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f1f5f9;
+      --bg-input: #f8fafc;
+      
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+      
+      /* Accents */
+      --teal-primary: #0d9488;
+      --teal-light: #ccfbf1;
+      --teal-hover: #0f766e;
+      --teal-glow: rgba(13, 148, 136, 0.2);
+
+      --cyan-accent: #06b6d4;
+
+      /* Financial Balances */
+      --emerald-receivable: #059669;
+      --emerald-bg: #d1fae5;
+      --emerald-text: #065f46;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+
+      --rose-debt: #e11d48;
+      --rose-bg: #ffe4e6;
+      --rose-text: #9f1239;
+      --rose-glow: rgba(244, 63, 94, 0.25);
+
+      --amber-badge: #d97706;
+      --amber-bg: #fef3c7;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-float: 0 20px 30px -10px rgba(15, 23, 42, 0.15);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --radius-pill: 9999px;
+
+      --header-height: 64px;
+      --nav-height: 68px;
+      
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Dark Mode Theme */
+    [data-theme="dark"] {
+      --bg-page: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-trans: rgba(17, 24, 39, 0.88);
+      --bg-card: #141e33;
+      --bg-card-subtle: #1c2742;
+      --bg-input: #101726;
+
+      --border-subtle: #24324f;
+      --border-strong: #334468;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+
+      --teal-primary: #14b8a6;
+      --teal-light: rgba(20, 184, 166, 0.18);
+      --teal-hover: #2dd4bf;
+      --teal-glow: rgba(20, 184, 166, 0.35);
+
+      --cyan-accent: #22d3ee;
+
+      --emerald-receivable: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.18);
+      --emerald-text: #6ee7b7;
+      --emerald-glow: rgba(16, 185, 129, 0.4);
+
+      --rose-debt: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.18);
+      --rose-text: #fda4af;
+      --rose-glow: rgba(244, 63, 94, 0.4);
+
+      --amber-badge: #fbbf24;
+      --amber-bg: rgba(251, 191, 36, 0.18);
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.6);
+      --shadow-float: 0 20px 35px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      padding-top: calc(var(--header-height) + var(--safe-top));
+      padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
+      transition: background-color 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+
+    /* Safe Area Notch Container */
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 16px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* =====================================================================
+       HEADER
+       ===================================================================== */
+    .app-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--header-height) + var(--safe-top));
+      padding-top: var(--safe-top);
+      background: var(--bg-surface-trans);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-inner {
+      width: 100%;
+      max-width: 900px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 19px;
+      box-shadow: 0 4px 12px var(--teal-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--teal-primary);
+      display: block;
+      letter-spacing: 0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 6px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-user-badge:hover {
+      border-color: var(--teal-primary);
+      background: var(--bg-card-subtle);
+    }
+
+    .avatar-sm {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+
+    .btn-cloud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: var(--radius-pill);
+      background: var(--teal-light);
+      color: var(--teal-primary);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cloud-badge:hover {
+      box-shadow: 0 2px 8px var(--teal-glow);
+      transform: translateY(-1px);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 16px;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-card-subtle);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn-benchmark-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-benchmark-badge:hover {
+      box-shadow: 0 2px 8px var(--emerald-glow);
+      transform: translateY(-1px);
+    }
+
+    /* =====================================================================
+       MOBILE NAVIGATION / DESKTOP TABS
+       ===================================================================== */
+    .app-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--nav-height) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: var(--bg-surface-trans);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 600px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+    }
+
+    .nav-tab {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-tab svg {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .nav-tab.active {
+      color: var(--teal-primary);
+    }
+
+    .nav-tab.active svg {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 28px;
+      height: 3px;
+      border-radius: 0 0 4px 4px;
+      background: var(--teal-primary);
+    }
+
+    .nav-fab-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .fab-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 16px var(--teal-glow);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-top: -16px;
+    }
+
+    .fab-btn:hover {
+      transform: translateY(-2px) scale(1.08);
+      box-shadow: 0 8px 22px var(--teal-glow);
+    }
+
+    .fab-btn:active {
+      transform: scale(0.94);
+    }
+
+    .fab-btn svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    /* =====================================================================
+       CARD & SECTION UTILITIES
+       ===================================================================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title svg {
+      color: var(--teal-primary);
+    }
+
+    /* Invite Banner Card */
+    .card-invite-banner {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(6, 182, 212, 0.08));
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+    }
+
+    .invite-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px var(--teal-glow);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      font-family: var(--font-main);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      color: white;
+      box-shadow: 0 4px 12px var(--teal-glow);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: white;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp:hover {
+      background: #20ba59;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card-subtle);
+      color: var(--text-main);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-subtle);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-main);
+      background: var(--bg-card-subtle);
+    }
+
+    .btn-danger {
+      background: var(--rose-bg);
+      color: var(--rose-debt);
+      border-color: rgba(244, 63, 94, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: var(--rose-debt);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-teal {
+      background: var(--teal-light);
+      color: var(--teal-primary);
+    }
+
+    .badge-emerald {
+      background: var(--emerald-bg);
+      color: var(--emerald-receivable);
+    }
+
+    .badge-rose {
+      background: var(--rose-bg);
+      color: var(--rose-debt);
+    }
+
+    .badge-amber {
+      background: var(--amber-bg);
+      color: var(--amber-badge);
+    }
+
+    /* =====================================================================
+       SUMMARY STATS ROW
+       ===================================================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--teal-primary), var(--cyan-accent));
+      opacity: 0.8;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--text-faint);
+    }
+
+    /* =====================================================================
+       SETTLEMENT CARDS ("WHO PAYS WHOM")
+       ===================================================================== */
+    .settlement-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .settlement-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+
+    .settlement-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--teal-primary);
+    }
+
+    .settlement-flow {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .person-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+
+    .avatar-debtor {
+      background: linear-gradient(135deg, #f43f5e, #be123c);
+      box-shadow: 0 2px 8px var(--rose-glow);
+    }
+
+    .avatar-creditor {
+      background: linear-gradient(135deg, #10b981, #047857);
+      box-shadow: 0 2px 8px var(--emerald-glow);
+    }
+
+    .person-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .flow-arrow-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    .flow-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .flow-arrow {
+      color: var(--teal-primary);
+      display: flex;
+      align-items: center;
+      animation: pulseArrow 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseArrow {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(3px); }
+    }
+
+    .settlement-amount-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .settlement-amount {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .settlement-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* All Settled Empty State */
+    .empty-state {
+      padding: 36px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-card-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--teal-primary);
+    }
+
+    /* =====================================================================
+       ROOMMATE BALANCES GRID
+       ===================================================================== */
+    .balances-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 540px) {
+      .balances-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .balance-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .balance-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .balance-card.receivable {
+      border-left: 4px solid var(--emerald-receivable);
+    }
+
+    .balance-card.debt {
+      border-left: 4px solid var(--rose-debt);
+    }
+
+    .balance-card.settled {
+      border-left: 4px solid var(--text-faint);
+    }
+
+    .balance-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .balance-person-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .balance-val {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .balance-val.positive {
+      color: var(--emerald-receivable);
+    }
+
+    .balance-val.negative {
+      color: var(--rose-debt);
+    }
+
+    .balance-val.zero {
+      color: var(--text-muted);
+    }
+
+    .balance-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-subtle);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .breakdown-item strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* =====================================================================
+       TRANSACTION ENTRY FORM
+       ===================================================================== */
+    .form-type-toggle {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+
+    .toggle-opt {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .toggle-opt.active {
+      background: var(--bg-card);
+      color: var(--teal-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-label span.hint {
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--teal-primary);
+      box-shadow: 0 0 0 3px var(--teal-glow);
+      background: var(--bg-card);
+    }
+
+    .input-amount-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .amount-currency {
+      position: absolute;
+      left: 14px;
+      font-weight: 700;
+      color: var(--teal-primary);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+
+    .form-input.amount-input {
+      padding-left: 50px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      letter-spacing: -0.01em;
+    }
+
+    /* Preset Quick Buttons */
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .chip-btn {
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card-subtle);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--teal-primary);
+      color: var(--teal-primary);
+      background: var(--teal-light);
+    }
+
+    /* Sharers Checkbox Selector */
+    .sharers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    @media (min-width: 500px) {
+      .sharers-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .sharer-checkbox-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .sharer-checkbox-card.selected {
+      background: var(--teal-light);
+      border-color: var(--teal-primary);
+      color: var(--teal-primary);
+      font-weight: 600;
+    }
+
+    .sharer-checkbox-card input[type="checkbox"] {
+      display: none;
+    }
+
+    .custom-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .sharer-checkbox-card.selected .custom-check {
+      background: var(--teal-primary);
+      border-color: var(--teal-primary);
+      color: white;
+    }
+
+    /* Split Live Preview Box */
+    .split-preview-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card-subtle);
+      border: 1px dashed var(--teal-primary);
+      font-size: 0.82rem;
+    }
+
+    .split-preview-header {
+      font-weight: 600;
+      color: var(--teal-primary);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .split-preview-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--text-muted);
+    }
+
+    /* =====================================================================
+       ENTRIES LIST & HISTORY
+       ===================================================================== */
+    .filters-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 600px) {
+      .filters-bar {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 0.88rem;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .filter-pill {
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .filter-pill.active {
+      background: var(--teal-primary);
+      border-color: var(--teal-primary);
+      color: white;
+    }
+
+    .entries-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .entry-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .entry-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .entry-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .entry-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .entry-icon-share {
+      background: var(--teal-light);
+      color: var(--teal-primary);
+    }
+
+    .entry-icon-pay {
+      background: var(--amber-bg);
+      color: var(--amber-badge);
+    }
+
+    .entry-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .entry-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .entry-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .entry-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .entry-amount {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text-main);
+    }
+
+    .entry-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .entry-action-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card-subtle);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .entry-action-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text-main);
+    }
+
+    .entry-action-btn.btn-del:hover {
+      background: var(--rose-bg);
+      color: var(--rose-debt);
+      border-color: var(--rose-debt);
+    }
+
+    /* =====================================================================
+       SMART BULK IMPORTER
+       ===================================================================== */
+    .importer-code-box {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      width: 100%;
+      height: 180px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      resize: vertical;
+      white-space: pre;
+    }
+
+    .bulk-preview-table-wrap {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-top: 12px;
+    }
+
+    .bulk-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    .bulk-table th {
+      background: var(--bg-card-subtle);
+      padding: 8px 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .bulk-table td {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .bulk-table tr:hover {
+      background: var(--bg-card-subtle);
+    }
+
+    .bulk-table tr.duplicate-row {
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    .diagnostic-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--rose-bg);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--rose-debt);
+      font-size: 0.8rem;
+    }
+
+    /* =====================================================================
+       ROOMMATE MANAGEMENT CHIPS
+       ===================================================================== */
+    .roommates-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .roommate-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .roommate-tag-del {
+      border: none;
+      background: none;
+      color: var(--text-faint);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: color 0.15s;
+    }
+
+    .roommate-tag-del:hover {
+      color: var(--rose-debt);
+    }
+
+    /* User Profile Selector Cards */
+    .user-select-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .user-select-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .user-select-card:hover {
+      border-color: var(--teal-primary);
+      background: var(--bg-card);
+    }
+
+    .user-select-card.active {
+      border-color: var(--teal-primary);
+      background: var(--teal-light);
+      color: var(--teal-primary);
+      font-weight: 700;
+    }
+
+    /* =====================================================================
+       MODALS & DIALOGS
+       ===================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-window {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      max-width: 540px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-float);
+      transform: scale(0.94);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .modal-backdrop.open .modal-window {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--bg-card-subtle);
+    }
+
+    /* WhatsApp Text Preview */
+    .whatsapp-preview-box {
+      background: #e5ddd5;
+      color: #111b21;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      max-height: 240px;
+      overflow-y: auto;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="dark"] .whatsapp-preview-box {
+      background: #1f2c34;
+      color: #e9edef;
+    }
+
+    /* =====================================================================
+       TOAST NOTIFICATIONS
+       ===================================================================== */
+    .toast-container {
+      position: fixed;
+      bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 120;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      background: var(--text-main);
+      color: var(--bg-surface);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+      animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes toastSlideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Tab View Visibility */
+    .tab-view {
+      display: none;
+    }
+
+    .tab-view.active {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeInView 0.25s ease-out;
+    }
+
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Benchmark Runner Modal Test Rows */
+    .benchmark-test-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card-subtle);
+      font-size: 0.85rem;
+    }
+
+    .benchmark-test-item.pass {
+      border-left: 3px solid var(--emerald-receivable);
+    }
+  </style>
+</head>
+<body data-theme="system">
+
+  <!-- =====================================================================
+       HEADER
+       ===================================================================== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group" id="btn-brand-home" title="Roomates Sheet">
+        <div class="brand-logo">₨</div>
+        <div class="brand-text">
+          <h1>Roomates Sheet</h1>
+          <span>PKR (Rs.) • Paisa Precision</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Active User Profile Switcher -->
+        <button class="btn-user-badge" id="btn-user-profile" title="Switch User Profile">
+          <div class="avatar-sm" id="header-user-avatar">S</div>
+          <span id="header-user-name">Sanaullah</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <!-- Cloud Sync & Room Share Trigger -->
+        <button class="btn-cloud-badge" id="btn-open-cloud-share" title="Share Room with Flatmates">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+          <span id="cloud-header-status">Share Room</span>
+        </button>
+
+        <!-- Verification Test Benchmark Trigger -->
+        <button class="btn-benchmark-badge" id="btn-open-benchmark" title="Run Benchmark Acceptance Test">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="benchmark-header-status">100% Verified</span>
+        </button>
+
+        <!-- WhatsApp Quick Export -->
+        <button class="icon-btn" id="btn-open-whatsapp" title="Export WhatsApp Settlement">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="icon-btn" id="btn-toggle-theme" title="Toggle Dark/Light Mode">
+          <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       MAIN CONTAINER
+       ===================================================================== -->
+  <main class="app-container">
+
+    <!-- ===================================================================
+         TAB 1: DASHBOARD & SETTLEMENTS VIEW
+         =================================================================== -->
+    <div class="tab-view active" id="view-dashboard">
+      
+      <!-- Multi-User Invite Flatmates Banner -->
+      <section class="card-invite-banner">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+            <div class="invite-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.98rem; color: var(--text-main);">Share & Split with Flatmates</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">
+                Room Code: <strong id="banner-room-code" style="color: var(--teal-primary); font-family: monospace;">FLAT-402</strong> • Friends can open on their mobile and log their own expenses!
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-whatsapp btn-sm" id="btn-banner-whatsapp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              WhatsApp Room Link
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-banner-cloud">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+              Live Sync Settings
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Metrics Grid -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Shared Spend</span>
+          <div class="stat-value" id="stat-total-spend">Rs. 0.00</div>
+          <span class="stat-sub" id="stat-shared-count">0 shared expenses</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">Direct Payments</span>
+          <div class="stat-value" id="stat-direct-transfers">Rs. 0.00</div>
+          <span class="stat-sub" id="stat-pay-count">0 cash payments</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">Settlement Transfers</span>
+          <div class="stat-value" id="stat-transfers-count">0</div>
+          <span class="stat-sub">Minimum cash flow</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">Flatmates Active</span>
+          <div class="stat-value" id="stat-roommates-count">4</div>
+          <span class="stat-sub">Pakistani Rupees (PKR)</span>
+        </div>
+      </section>
+
+      <!-- Optimal Debt Settlements Section ("Who Pays Whom") -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Optimal Debt Settlements
+          </div>
+          <span class="badge badge-teal" id="settlements-badge">3 Transfers Needed</span>
+        </div>
+
+        <div class="settlement-container" id="settlements-list">
+          <!-- Dynamically populated settlements -->
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-whatsapp" id="btn-dash-whatsapp">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            Copy WhatsApp Settlement Summary
+          </button>
+          <button class="btn btn-secondary" id="btn-quick-add-trans">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add New Expense
+          </button>
+        </div>
+      </section>
+
+      <!-- Net Balances Per Roommate -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Roommate Balances & Ledger
+          </div>
+          <span class="badge badge-emerald">Zero-Sum Sum: 0.00</span>
+        </div>
+
+        <div class="balances-grid" id="balances-grid">
+          <!-- Dynamically populated roommate balance cards -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ===================================================================
+         TAB 2: ENTRIES HISTORY VIEW
+         =================================================================== -->
+    <div class="tab-view" id="view-entries">
+      
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Expense & Payment Ledger
+          </div>
+          <span class="badge badge-teal" id="entries-count-badge">20 Entries</span>
+        </div>
+
+        <!-- Filters Bar -->
+        <div class="filters-bar">
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="filter-search" class="search-input" placeholder="Search by description, person, amount...">
+          </div>
+
+          <div class="filter-pills">
+            <button class="filter-pill active" data-type="all">All</button>
+            <button class="filter-pill" data-type="share">Shared</button>
+            <button class="filter-pill" data-type="pay">Direct Pay</button>
+          </div>
+
+          <select id="filter-roommate" class="form-select" style="max-width: 160px; padding: 8px 12px; font-size: 0.85rem;">
+            <option value="all">All Roommates</option>
+          </select>
+        </div>
+
+        <!-- Entries List -->
+        <div class="entries-list" id="entries-list-container">
+          <!-- Dynamically populated entry cards -->
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ===================================================================
+         TAB 3: ADD / EDIT TRANSACTION FORM
+         =================================================================== -->
+    <div class="tab-view" id="view-add">
+      
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title" id="form-heading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            Add New Transaction
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btn-cancel-edit" style="display: none;">Cancel Edit</button>
+        </div>
+
+        <!-- Segmented Type Selector -->
+        <div class="form-type-toggle">
+          <button type="button" class="toggle-opt active" id="btn-type-share" data-type="share">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            Shared Expense
+          </button>
+          <button type="button" class="toggle-opt" id="btn-type-pay" data-type="pay">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Direct Payment
+          </button>
+        </div>
+
+        <form id="transaction-form">
+          <input type="hidden" id="entry-edit-id" value="">
+
+          <!-- Amount Input with Quick Presets -->
+          <div class="form-group">
+            <label class="form-label">
+              Amount
+              <span class="hint" id="paisa-preview">0 paisa</span>
+            </label>
+            <div class="input-amount-wrap">
+              <span class="amount-currency">Rs.</span>
+              <input type="number" step="any" min="0.01" id="input-amount" class="form-input amount-input" placeholder="0.00" required>
+            </div>
+            <div class="preset-chips">
+              <button type="button" class="chip-btn" data-amt="200">+200</button>
+              <button type="button" class="chip-btn" data-amt="500">+500</button>
+              <button type="button" class="chip-btn" data-amt="1000">+1,000</button>
+              <button type="button" class="chip-btn" data-amt="1500">+1,500</button>
+              <button type="button" class="chip-btn" data-amt="2960">2,960</button>
+              <button type="button" class="chip-btn" data-amt="5000">5,000</button>
+            </div>
+          </div>
+
+          <!-- Date & Description -->
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="input-date">Date</label>
+              <input type="date" id="input-date" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-desc">Description</label>
+              <input type="text" id="input-desc" class="form-input" placeholder="e.g. Dinner, Groceries, Electricity" required>
+            </div>
+          </div>
+
+          <!-- Quick Description Presets -->
+          <div class="preset-chips" style="margin-top: -6px; margin-bottom: 16px;">
+            <button type="button" class="chip-btn" data-desc="Groceries">🛒 Groceries</button>
+            <button type="button" class="chip-btn" data-desc="Dinner / Food">🍲 Dinner</button>
+            <button type="button" class="chip-btn" data-desc="Electricity Bill">⚡ Electricity</button>
+            <button type="button" class="chip-btn" data-desc="Internet / Wi-Fi">📶 Wi-Fi</button>
+            <button type="button" class="chip-btn" data-desc="Water Bottles">💧 Water</button>
+            <button type="button" class="chip-btn" data-desc="Cash Settlement">🤝 Cash Given</button>
+          </div>
+
+          <!-- SHARED EXPENSE FIELDS -->
+          <div id="fields-share">
+            <div class="form-group">
+              <label class="form-label" for="select-payer">Who Paid?</label>
+              <select id="select-payer" class="form-select"></select>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">
+                <span>Split Among Sharers</span>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-ghost btn-sm" id="btn-select-all-sharers" style="padding: 2px 8px; font-size: 0.75rem;">Select All</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-sharers" style="padding: 2px 8px; font-size: 0.75rem;">Clear</button>
+                </div>
+              </div>
+              <div class="sharers-grid" id="sharers-selector-grid">
+                <!-- Checkboxes populated here -->
+              </div>
+            </div>
+
+            <!-- Live Split Preview Box -->
+            <div class="split-preview-box" id="split-live-preview">
+              <div class="split-preview-header">
+                <span>Exact Split Preview</span>
+                <span id="preview-sharers-count">4 sharers</span>
+              </div>
+              <div class="split-preview-list" id="preview-shares-detail">
+                Enter an amount to view exact paisa split per person.
+              </div>
+            </div>
+          </div>
+
+          <!-- DIRECT PAYMENT FIELDS -->
+          <div id="fields-pay" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="select-pay-from">From (Gives Cash)</label>
+                <select id="select-pay-from" class="form-select"></select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="select-pay-to">To (Receives Cash)</label>
+                <select id="select-pay-to" class="form-select"></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div style="margin-top: 24px; display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary" id="btn-submit-entry" style="flex: 1; padding: 14px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="btn-submit-text">Record Shared Expense</span>
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+    </div>
+
+    <!-- ===================================================================
+         TAB 4: SMART BULK IMPORTER
+         =================================================================== -->
+    <div class="tab-view" id="view-import">
+      
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Smart Pipe-Separated Bulk Importer
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btn-load-sample-bulk">Insert Benchmark 20</button>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          Paste pipe-separated (<code>|</code>) transaction rows below. The importer detects duplicates, validates dates and amounts, and reports unreadable lines without guesswork.
+        </p>
+
+        <!-- Syntax Reference Box -->
+        <div style="background: var(--bg-card-subtle); padding: 10px 14px; border-radius: var(--radius-md); font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
+          <div><strong>Shared Expense:</strong> <code>share | YYYY-MM-DD | Description | Amount | Payer | Sharer1, Sharer2</code></div>
+          <div><strong>Direct Payment:</strong> <code>pay | YYYY-MM-DD | Description | Amount | From | To</code></div>
+        </div>
+
+        <textarea id="bulk-textarea" class="importer-code-box" placeholder="share | 2026-10-22 | 3-person expenses | 1410 | Sanaullah | Sanaullah, Ahmed, Faizan&#10;pay | 2026-10-22 | Sanaullah to Ahmed | 500 | Sanaullah | Ahmed"></textarea>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; flex-wrap: wrap; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer;">
+            <input type="checkbox" id="chk-auto-add-people" checked>
+            <span>Auto-add newly discovered roommates</span>
+          </label>
+
+          <button class="btn btn-secondary btn-sm" id="btn-parse-bulk">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Parse & Validate Lines
+          </button>
+        </div>
+
+        <!-- Diagnostic Errors Drawer -->
+        <div class="diagnostic-box" id="bulk-diagnostic-box" style="display: none;">
+          <strong>Unreadable / Invalid Lines:</strong>
+          <ul id="bulk-diagnostic-list" style="margin-top: 6px; padding-left: 20px;"></ul>
+        </div>
+
+        <!-- Preview Table Section -->
+        <div id="bulk-preview-section" style="display: none; margin-top: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 0.88rem; font-weight: 600;">Parsed Preview (<span id="parsed-valid-count">0</span> valid entries)</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-ghost btn-sm" id="btn-bulk-toggle-all">Toggle All</button>
+            </div>
+          </div>
+
+          <div class="bulk-preview-table-wrap">
+            <table class="bulk-table">
+              <thead>
+                <tr>
+                  <th style="width: 36px;"><input type="checkbox" id="chk-bulk-master" checked></th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Parties</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="bulk-preview-tbody"></tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary" id="btn-commit-bulk">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Commit Selected Entries to Sheet
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ===================================================================
+         TAB 5: ROOMMATES & SETTINGS VIEW
+         =================================================================== -->
+    <div class="tab-view" id="view-roommates">
+      
+      <!-- Roommates Management -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Roommates & Flatmates
+          </div>
+          <span class="badge badge-teal" id="roommates-active-badge">4 Flatmates</span>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          Add or manage your flatmates. Deleting a roommate is safely blocked if they are involved in active transactions.
+        </p>
+
+        <form id="add-roommate-form" style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <input type="text" id="input-new-roommate" class="form-input" placeholder="e.g. Sanaullah, Hamza, یا اردو نام" required>
+          <button type="submit" class="btn btn-primary" style="white-space: nowrap;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Flatmate
+          </button>
+        </form>
+
+        <div class="roommates-chips-wrap" id="roommates-chips-container">
+          <!-- Roommate chips -->
+        </div>
+      </section>
+
+      <!-- Multi-User Cloud Sync Status & Settings -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+            Multi-User Cloud Sync & Room Code
+          </div>
+          <span class="badge badge-teal" id="settings-cloud-status-badge">Local Mode</span>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+          Share a single room across all your roommates' mobile phones so everyone can login, see live updates, and record their own payments in real time.
+        </p>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btn-settings-open-share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            Manage Room & Share Link
+          </button>
+        </div>
+      </section>
+
+      <!-- Data Backup & Reset Tools -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            Data Persistence & Portability
+          </div>
+          <span class="badge badge-emerald">Local-First</span>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+          All data is persisted in browser local storage. You can backup your entire sheet or load the official test benchmark dataset at any time.
+        </p>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" id="btn-export-backup">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export JSON Backup
+          </button>
+
+          <label class="btn btn-secondary" style="cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Import JSON Backup
+            <input type="file" id="file-import-backup" accept=".json" style="display: none;">
+          </label>
+
+          <button class="btn btn-secondary" id="btn-load-benchmark-preset">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Reset to Official Benchmark (20 Entries)
+          </button>
+
+          <button class="btn btn-danger" id="btn-clear-all-data">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Clear All Data
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- =====================================================================
+       BOTTOM NAVIGATION BAR (MOBILE & DESKTOP)
+       ===================================================================== -->
+  <nav class="app-nav">
+    <div class="nav-inner">
+      <button class="nav-tab active" data-tab="dashboard" title="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Overview</span>
+      </button>
+
+      <button class="nav-tab" data-tab="entries" title="Ledger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        <span>Ledger</span>
+      </button>
+
+      <!-- Center Floating Action Button (FAB) -->
+      <div class="nav-fab-wrap">
+        <button class="fab-btn" id="fab-add-trans" title="Add Transaction">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+      </div>
+
+      <button class="nav-tab" data-tab="import" title="Bulk Importer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Importer</span>
+      </button>
+
+      <button class="nav-tab" data-tab="roommates" title="Roommates & Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        <span>Flatmates</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       MODAL 1: WHATSAPP EXPORTER
+       ===================================================================== -->
+  <div class="modal-backdrop" id="modal-whatsapp">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">Share Settlement via WhatsApp</h3>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Here is the clean WhatsApp summary with bold names, exact settlements, and individual balances:
+        </p>
+        <div class="whatsapp-preview-box" id="whatsapp-preview-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal">Close</button>
+        <button class="btn btn-whatsapp" id="btn-copy-whatsapp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy to Clipboard
+        </button>
+        <a class="btn btn-whatsapp" id="btn-open-whatsapp-link" target="_blank" rel="noopener noreferrer">
+          Open WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: USER PROFILE / LOGIN SWITCHER ("WHO IS USING THIS DEVICE?")
+       ===================================================================== -->
+  <div class="modal-backdrop" id="modal-user-profile">
+    <div class="modal-window" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Who is Using This Device?</h3>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Select your name so that when you log expenses or payments, your name is automatically chosen as the payer and tagged in the audit trail.
+        </p>
+
+        <div class="user-select-grid" id="user-profile-list">
+          <!-- Populated by roommates list -->
+        </div>
+
+        <form id="form-quick-add-user" style="display: flex; gap: 8px; margin-top: 6px;">
+          <input type="text" id="input-quick-user-name" class="form-input" placeholder="Or enter new flatmate name..." required>
+          <button type="submit" class="btn btn-secondary btn-sm" style="white-space: nowrap;">+ Add & Select</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-close-modal">Save & Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 3: CLOUD SYNC & ROOM CODE SHARING
+       ===================================================================== -->
+  <div class="modal-backdrop" id="modal-cloud-share">
+    <div class="modal-window" style="max-width: 580px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3 class="modal-title">Share Room with Flatmates</h3>
+          <span class="badge badge-teal" id="cloud-modal-status-badge">Local Mode</span>
+        </div>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Room Code & Link Sharing -->
+        <div style="background: var(--bg-card-subtle); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">1. Invite Flatmates via Room Code</div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+            Every flatmate who connects to this Room Code shares the exact same ledger, balances, and real-time calculations.
+          </p>
+
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+            <input type="text" id="input-room-code" class="form-input" style="font-family: monospace; font-weight: 700; font-size: 1.1rem; text-transform: uppercase;" placeholder="FLAT-402">
+            <button class="btn btn-primary" id="btn-update-room-code" style="white-space: nowrap;">Set Room</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-whatsapp" id="btn-share-room-whatsapp" style="width: 100%;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              Send WhatsApp Room Invite Link
+            </button>
+
+            <button class="btn btn-secondary btn-sm" id="btn-copy-room-link">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy Room Link to Clipboard
+            </button>
+          </div>
+
+          <!-- Same Wi-Fi Home Access -->
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-subtle); font-size: 0.78rem; color: var(--text-muted);">
+            <div><strong>🏠 Same Wi-Fi Home Network Access:</strong></div>
+            <div style="margin-top: 2px;">If flatmates are connected to your home Wi-Fi, they can open: <code style="background: var(--bg-card); padding: 2px 6px; border-radius: 4px; font-weight: 600;">http://192.168.0.114:8080/</code></div>
+          </div>
+        </div>
+
+        <!-- Real-Time Firebase Cloud Sync Configuration -->
+        <div style="background: var(--bg-card-subtle); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="font-weight: 700; font-size: 0.95rem;">2. Live Cloud Real-Time Sync (Firebase)</div>
+            <button class="btn btn-ghost btn-sm" id="btn-toggle-firebase-help" style="padding: 2px 6px; font-size: 0.75rem;">Setup Guide ▼</button>
+          </div>
+
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+            Sync live across Android, iPhone, and PC anywhere in the world using Google Firebase Firestore (100% free tier).
+          </p>
+
+          <div id="firebase-help-drawer" style="display: none; background: var(--bg-card); padding: 12px; border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+            <strong>Quick 2-Minute Free Firebase Setup:</strong>
+            <ol style="padding-left: 20px; margin-top: 4px;">
+              <li>Go to <a href="https://console.firebase.google.com" target="_blank" style="color: var(--teal-primary);">console.firebase.google.com</a> and click <em>Create Project</em>.</li>
+              <li>Under <em>Build</em>, click <em>Firestore Database</em> ➔ <em>Create database</em> (start in Test mode).</li>
+              <li>Click <em>Project settings (⚙️)</em> ➔ <em>Web app (&lt;/&gt;)</em> ➔ copy your <code>firebaseConfig</code> object.</li>
+              <li>Paste your JSON config below and click <strong>Connect Cloud Sync</strong>!</li>
+            </ol>
+          </div>
+
+          <textarea id="firebase-config-input" class="importer-code-box" style="height: 100px; font-size: 0.78rem;" placeholder='Paste firebaseConfig object or JSON here, e.g.:&#10;{&#10;  "apiKey": "AIzaSy...",&#10;  "projectId": "roomates-sheet-123",&#10;  "authDomain": "roomates-sheet-123.firebaseapp.com"&#10;}'></textarea>
+
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="btn btn-primary btn-sm" id="btn-connect-firebase">Connect Cloud Sync</button>
+            <button class="btn btn-secondary btn-sm" id="btn-disconnect-firebase">Use Local Mode Only</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 4: BENCHMARK ACCEPTANCE VERIFICATION RUNNER
+       ===================================================================== -->
+  <div class="modal-backdrop" id="modal-benchmark">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">Verification Benchmark Suite</h3>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Validates the mathematical calculation, paisa remainder distribution, and greedy debt minimization against the official Roommates benchmark dataset:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;" id="benchmark-results-container">
+          <!-- Populated by runner -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal">Close</button>
+        <button class="btn btn-primary" id="btn-rerun-benchmark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          Re-Run Verification
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 5: DELETE CONFIRMATION
+       ===================================================================== -->
+  <div class="modal-backdrop" id="modal-delete">
+    <div class="modal-window" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Entry</h3>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem;" id="delete-confirm-text">
+          Are you sure you want to delete this transaction? All balances will be recalculated immediately.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal">Cancel</button>
+        <button class="btn btn-danger" id="btn-confirm-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- =====================================================================
+       APPLICATION LOGIC & CORE ARCHITECTURE
+       ===================================================================== -->
+  <script>
+    /* =====================================================================
+       1. DATA LAYER & STORAGE ABSTRACTION
+       ===================================================================== */
+    class StorageAdapter {
+      getRoommates() { throw new Error('Not implemented'); }
+      saveRoommates(roommates) { throw new Error('Not implemented'); }
+      getEntries() { throw new Error('Not implemented'); }
+      saveEntries(entries) { throw new Error('Not implemented'); }
+      getCurrentUser() { throw new Error('Not implemented'); }
+      saveCurrentUser(user) { throw new Error('Not implemented'); }
+      getRoomId() { throw new Error('Not implemented'); }
+      saveRoomId(id) { throw new Error('Not implemented'); }
+      clear() { throw new Error('Not implemented'); }
+    }
+
+    class LocalStorageAdapter extends StorageAdapter {
+      constructor() {
+        super();
+        this.ROOMMATES_KEY = 'roomates_sheet_people_v1';
+        this.ENTRIES_KEY = 'roomates_sheet_entries_v1';
+        this.THEME_KEY = 'roomates_sheet_theme_v1';
+        this.USER_KEY = 'roomates_sheet_user_v1';
+        this.ROOM_KEY = 'roomates_sheet_room_v1';
+        this.FIREBASE_CONFIG_KEY = 'roomates_sheet_fb_config_v1';
+      }
+
+      getRoommates() {
+        try {
+          const raw = localStorage.getItem(this.ROOMMATES_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {
+          console.error('Failed reading roommates:', e);
+        }
+        return ["Sanaullah", "Ahmed", "Faizan", "Ali"];
+      }
+
+      saveRoommates(roommates) {
+        localStorage.setItem(this.ROOMMATES_KEY, JSON.stringify(roommates));
+      }
+
+      getEntries() {
+        try {
+          const raw = localStorage.getItem(this.ENTRIES_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {
+          console.error('Failed reading entries:', e);
+        }
+        return null; // Signals initial run needed
+      }
+
+      saveEntries(entries) {
+        localStorage.setItem(this.ENTRIES_KEY, JSON.stringify(entries));
+      }
+
+      getCurrentUser() {
+        return localStorage.getItem(this.USER_KEY) || "Sanaullah";
+      }
+
+      saveCurrentUser(user) {
+        localStorage.setItem(this.USER_KEY, user);
+      }
+
+      getRoomId() {
+        return localStorage.getItem(this.ROOM_KEY) || "FLAT-402";
+      }
+
+      saveRoomId(id) {
+        localStorage.setItem(this.ROOM_KEY, id);
+      }
+
+      getFirebaseConfig() {
+        try {
+          const raw = localStorage.getItem(this.FIREBASE_CONFIG_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        return null;
+      }
+
+      saveFirebaseConfig(config) {
+        if (!config) {
+          localStorage.removeItem(this.FIREBASE_CONFIG_KEY);
+        } else {
+          localStorage.setItem(this.FIREBASE_CONFIG_KEY, JSON.stringify(config));
+        }
+      }
+
+      getTheme() {
+        return localStorage.getItem(this.THEME_KEY) || 'system';
+      }
+
+      saveTheme(theme) {
+        localStorage.setItem(this.THEME_KEY, theme);
+      }
+
+      clear() {
+        localStorage.removeItem(this.ROOMMATES_KEY);
+        localStorage.removeItem(this.ENTRIES_KEY);
+      }
+    }
+
+    // Live Real-Time Firebase Firestore Cloud Sync Adapter
+    class FirestoreAdapter {
+      constructor(config, roomId, onSyncCallback) {
+        this.config = config;
+        this.roomId = roomId || 'FLAT-402';
+        this.onSyncCallback = onSyncCallback;
+        this.db = null;
+        this.unsubscribe = null;
+        this.isConnected = false;
+      }
+
+      init() {
+        if (!window.firebase || !this.config) return false;
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(this.config);
+          }
+          this.db = firebase.firestore();
+          this.listenToRoom();
+          this.isConnected = true;
+          return true;
+        } catch (e) {
+          console.error("Firebase init failed:", e);
+          this.isConnected = false;
+          return false;
+        }
+      }
+
+      setRoomId(newRoomId) {
+        this.roomId = newRoomId;
+        if (this.isConnected) {
+          this.listenToRoom();
+        }
+      }
+
+      listenToRoom() {
+        if (!this.db) return;
+        if (this.unsubscribe) this.unsubscribe();
+        
+        const docRef = this.db.collection('rooms').doc(this.roomId);
+        this.unsubscribe = docRef.onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            if (this.onSyncCallback) {
+              this.onSyncCallback(data.roommates || [], data.entries || []);
+            }
+          } else {
+            // First time room creation
+            this.pushData(AppState.roommates, AppState.entries);
+          }
+        }, err => {
+          console.error("Firestore listener error:", err);
+        });
+      }
+
+      async pushData(roommates, entries) {
+        if (!this.db || !this.isConnected) return;
+        try {
+          await this.db.collection('rooms').doc(this.roomId).set({
+            roommates,
+            entries,
+            updatedAt: new Date().toISOString(),
+            lastUpdatedBy: AppState.currentUser
+          }, { merge: true });
+        } catch (e) {
+          console.error("Failed pushing to Firestore:", e);
+        }
+      }
+
+      disconnect() {
+        if (this.unsubscribe) {
+          this.unsubscribe();
+          this.unsubscribe = null;
+        }
+        this.isConnected = false;
+      }
+    }
+
+    const Storage = new LocalStorageAdapter();
+    let cloudAdapter = null;
+
+    /* =====================================================================
+       2. OFFICIAL BENCHMARK DATASET SPECIFICATION
+       ===================================================================== */
+    const BENCHMARK_ROOMMATES = ["Sanaullah", "Ahmed", "Faizan", "Ali"];
+
+    const BENCHMARK_ENTRIES = [
+      { id: "b1", type: "share", date: "2026-10-22", desc: "3-person expenses", amount: 141000, payer: "Sanaullah", sharers: ["Sanaullah", "Ahmed", "Faizan"], by: "Sanaullah" },
+      { id: "b2", type: "share", date: "2026-10-22", desc: "3-person expenses", amount: 296000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan"], by: "Faizan" },
+      { id: "b3", type: "share", date: "2026-10-22", desc: "4-person expenses", amount: 119000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan", "Ali"], by: "Faizan" },
+      { id: "b4", type: "share", date: "2026-10-22", desc: "4-person expenses", amount: 20000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan", "Ali"], by: "Faizan" },
+      { id: "b5", type: "share", date: "2026-10-22", desc: "4-person expenses", amount: 30000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan", "Ali"], by: "Faizan" },
+      { id: "b6", type: "pay", date: "2026-10-22", desc: "Sanaullah to Ahmed", amount: 50000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
+      { id: "b7", type: "pay", date: "2026-10-22", desc: "Sanaullah to Ahmed", amount: 100000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
+      { id: "b8", type: "pay", date: "2026-10-22", desc: "Sanaullah to Ahmed", amount: 29000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
+      { id: "b9", type: "pay", date: "2026-10-22", desc: "Sanaullah to Ahmed", amount: 160000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
+      { id: "b10", type: "pay", date: "2026-10-22", desc: "Sanaullah to Ahmed", amount: 50000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
+      { id: "b11", type: "pay", date: "2026-10-22", desc: "Sanaullah to Ahmed", amount: 50000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
+      { id: "b12", type: "pay", date: "2026-10-22", desc: "Ahmed to Sanaullah", amount: 15000, from: "Ahmed", to: "Sanaullah", by: "Ahmed" },
+      { id: "b13", type: "pay", date: "2026-10-22", desc: "Ahmed to Sanaullah", amount: 12000, from: "Ahmed", to: "Sanaullah", by: "Ahmed" },
+      { id: "b14", type: "pay", date: "2026-10-22", desc: "Ahmed to Sanaullah", amount: 300000, from: "Ahmed", to: "Sanaullah", by: "Ahmed" },
+      { id: "b15", type: "pay", date: "2026-10-22", desc: "Sanaullah to Faizan", amount: 20000, from: "Sanaullah", to: "Faizan", by: "Sanaullah" },
+      { id: "b16", type: "pay", date: "2026-10-22", desc: "Sanaullah to Faizan", amount: 8000, from: "Sanaullah", to: "Faizan", by: "Sanaullah" },
+      { id: "b17", type: "pay", date: "2026-10-22", desc: "Sanaullah to Faizan", amount: 35000, from: "Sanaullah", to: "Faizan", by: "Sanaullah" },
+      { id: "b18", type: "pay", date: "2026-10-22", desc: "Faizan to Sanaullah", amount: 9000, from: "Faizan", to: "Sanaullah", by: "Faizan" },
+      { id: "b19", type: "pay", date: "2026-10-22", desc: "Faizan to Sanaullah", amount: 5000, from: "Faizan", to: "Sanaullah", by: "Faizan" },
+      { id: "b20", type: "pay", date: "2026-10-22", desc: "Faizan to Sanaullah", amount: 30000, from: "Faizan", to: "Sanaullah", by: "Faizan" }
+    ];
+
+    /* =====================================================================
+       3. MATHEMATICAL ENGINE & SETTLEMENT ALGORITHM
+       ===================================================================== */
+    const MathEngine = {
+      rupeesToPaisa(rupees) {
+        if (typeof rupees === 'number') return Math.round(rupees * 100);
+        const cleaned = String(rupees).replace(/[^0-9.-]+/g, '');
+        const parsed = parseFloat(cleaned);
+        if (isNaN(parsed)) return 0;
+        return Math.round(parsed * 100);
+      },
+
+      formatPaisa(paisa, includeSymbol = true) {
+        const isNeg = paisa < 0;
+        const abs = Math.abs(paisa);
+        const rupees = Math.floor(abs / 100);
+        const rem = abs % 100;
+        const formattedRupees = rupees.toLocaleString('en-PK');
+        const formattedPaisa = rem.toString().padStart(2, '0');
+        const numStr = `${formattedRupees}.${formattedPaisa}`;
+        if (!includeSymbol) return `${isNeg ? '-' : ''}${numStr}`;
+        return `${isNeg ? '-' : ''}Rs. ${numStr}`;
+      },
+
+      calculateSplitShares(amountPaisa, sharers) {
+        const N = sharers.length;
+        if (N === 0) return {};
+        const base_share = Math.floor(amountPaisa / N);
+        const remainder = amountPaisa - (base_share * N);
+
+        const shares = {};
+        sharers.forEach((p, idx) => {
+          shares[p] = base_share + (idx < remainder ? 1 : 0);
+        });
+        return shares;
+      },
+
+      calculateBalances(people, entries) {
+        const balances = {};
+        const ledgers = {};
+
+        people.forEach(p => {
+          balances[p] = 0;
+          ledgers[p] = { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+        });
+
+        entries.forEach(entry => {
+          if (entry.type === 'share') {
+            const amount = entry.amount;
+            const sharers = entry.sharers || [];
+            if (sharers.length === 0) return;
+
+            const shares = this.calculateSplitShares(amount, sharers);
+
+            sharers.forEach(p => {
+              const allocated = shares[p];
+              if (balances[p] === undefined) {
+                balances[p] = 0;
+                ledgers[p] = { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+              }
+              balances[p] -= allocated;
+              ledgers[p].shareCost += allocated;
+            });
+
+            if (balances[entry.payer] === undefined) {
+              balances[entry.payer] = 0;
+              ledgers[entry.payer] = { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+            }
+            balances[entry.payer] += amount;
+            ledgers[entry.payer].paidShared += amount;
+
+          } else if (entry.type === 'pay') {
+            const amount = entry.amount;
+            const from = entry.from;
+            const to = entry.to;
+
+            if (balances[from] === undefined) {
+              balances[from] = 0;
+              ledgers[from] = { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+            }
+            if (balances[to] === undefined) {
+              balances[to] = 0;
+              ledgers[to] = { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+            }
+
+            balances[from] += amount;
+            ledgers[from].paySent += amount;
+
+            balances[to] -= amount;
+            ledgers[to].payReceived += amount;
+          }
+        });
+
+        return { balances, ledgers };
+      },
+
+      calculateSettlements(balances) {
+        const creditors = [];
+        const debtors = [];
+
+        for (const [person, bal] of Object.entries(balances)) {
+          if (bal > 0) {
+            creditors.push({ person, amount: bal });
+          } else if (bal < 0) {
+            debtors.push({ person, amount: Math.abs(bal) });
+          }
+        }
+
+        creditors.sort((a, b) => b.amount - a.amount);
+        debtors.sort((a, b) => b.amount - a.amount);
+
+        const settlements = [];
+        let cIdx = 0;
+        let dIdx = 0;
+
+        while (cIdx < creditors.length && dIdx < debtors.length) {
+          const creditor = creditors[cIdx];
+          const debtor = debtors[dIdx];
+
+          const transfer = Math.min(debtor.amount, creditor.amount);
+
+          settlements.push({
+            from: debtor.person,
+            to: creditor.person,
+            amount: transfer
+          });
+
+          debtor.amount -= transfer;
+          creditor.amount -= transfer;
+
+          if (creditor.amount === 0) cIdx++;
+          if (debtor.amount === 0) dIdx++;
+        }
+
+        return settlements;
+      }
+    };
+
+    /* =====================================================================
+       4. SMART BULK LINE IMPORTER ENGINE
+       ===================================================================== */
+    const ImporterEngine = {
+      parseLines(text, existingPeople, existingEntries) {
+        const lines = text.split('\n');
+        const parsed = [];
+        const errors = [];
+        const discoveredPeople = new Set();
+
+        lines.forEach((line, idx) => {
+          const lineNum = idx + 1;
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) return;
+
+          const parts = trimmed.split('|').map(s => s.trim());
+          if (parts.length < 5) {
+            errors.push(`Line ${lineNum}: Missing fields. Found ${parts.length} parts, expected 5 or 6.`);
+            return;
+          }
+
+          const type = parts[0].toLowerCase();
+          const date = parts[1];
+          const desc = parts[2];
+          const amountRaw = parts[3];
+
+          if (type !== 'share' && type !== 'pay') {
+            errors.push(`Line ${lineNum}: Invalid type '${parts[0]}'. Must be 'share' or 'pay'.`);
+            return;
+          }
+
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            errors.push(`Line ${lineNum}: Invalid date '${date}'. Expected YYYY-MM-DD.`);
+            return;
+          }
+
+          const amountPaisa = MathEngine.rupeesToPaisa(amountRaw);
+          if (isNaN(amountPaisa) || amountPaisa <= 0) {
+            errors.push(`Line ${lineNum}: Invalid amount '${amountRaw}'. Must be a positive number.`);
+            return;
+          }
+
+          if (type === 'share') {
+            if (parts.length < 6) {
+              errors.push(`Line ${lineNum}: Shared expense requires payer and sharers (6 parts).`);
+              return;
+            }
+            const payer = parts[4];
+            const sharersRaw = parts[5];
+            const sharers = sharersRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+            if (!payer) {
+              errors.push(`Line ${lineNum}: Payer name is missing.`);
+              return;
+            }
+            if (sharers.length === 0) {
+              errors.push(`Line ${lineNum}: At least one sharer must be specified.`);
+              return;
+            }
+
+            discoveredPeople.add(payer);
+            sharers.forEach(s => discoveredPeople.add(s));
+
+            const isDuplicate = existingEntries.some(e => 
+              e.type === 'share' &&
+              e.date === date &&
+              e.amount === amountPaisa &&
+              e.payer === payer &&
+              e.desc.toLowerCase() === desc.toLowerCase()
+            );
+
+            parsed.push({
+              raw: line,
+              lineNum,
+              type: 'share',
+              date,
+              desc,
+              amount: amountPaisa,
+              payer,
+              sharers,
+              by: AppState.currentUser || payer,
+              isDuplicate,
+              selected: !isDuplicate
+            });
+
+          } else if (type === 'pay') {
+            if (parts.length < 6) {
+              errors.push(`Line ${lineNum}: Direct payment requires From and To persons.`);
+              return;
+            }
+            const from = parts[4];
+            const to = parts[5];
+
+            if (!from || !to) {
+              errors.push(`Line ${lineNum}: Both 'From' and 'To' persons are required.`);
+              return;
+            }
+            if (from.toLowerCase() === to.toLowerCase()) {
+              errors.push(`Line ${lineNum}: 'From' and 'To' cannot be the same person (${from}).`);
+              return;
+            }
+
+            discoveredPeople.add(from);
+            discoveredPeople.add(to);
+
+            const isDuplicate = existingEntries.some(e => 
+              e.type === 'pay' &&
+              e.date === date &&
+              e.amount === amountPaisa &&
+              e.from === from &&
+              e.to === to
+            );
+
+            parsed.push({
+              raw: line,
+              lineNum,
+              type: 'pay',
+              date,
+              desc,
+              amount: amountPaisa,
+              from,
+              to,
+              by: AppState.currentUser || from,
+              isDuplicate,
+              selected: !isDuplicate
+            });
+          }
+        });
+
+        return { parsed, errors, discoveredPeople: Array.from(discoveredPeople) };
+      }
+    };
+
+    /* =====================================================================
+       5. WHATSAPP SETTLEMENT EXPORTER
+       ===================================================================== */
+    const WhatsAppFormatter = {
+      formatMessage(people, entries, balances, settlements) {
+        const today = new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' });
+        
+        let totalSpendPaisa = 0;
+        entries.forEach(e => {
+          if (e.type === 'share') totalSpendPaisa += e.amount;
+        });
+
+        let msg = `*Roomates Sheet Settlement*\n`;
+        msg += `🏠 Room: *${AppState.roomId}*\n`;
+        msg += `📅 Date: ${today}\n`;
+        msg += `💰 Total Shared Expenses: ${MathEngine.formatPaisa(totalSpendPaisa)}\n\n`;
+
+        msg += `*Optimal Settlements (${settlements.length} transfer${settlements.length === 1 ? '' : 's'}):*\n`;
+        if (settlements.length === 0) {
+          msg += `🎉 All balances are settled up! Zero transfers needed.\n\n`;
+        } else {
+          settlements.forEach(s => {
+            msg += `👉 *${s.from}* pays *${s.to}*: ${MathEngine.formatPaisa(s.amount)}\n`;
+          });
+          msg += `\n`;
+        }
+
+        msg += `*Net Balances:*\n`;
+        for (const p of people) {
+          const bal = balances[p] || 0;
+          if (bal > 0) {
+            msg += `🟢 *${p}*: gets ${MathEngine.formatPaisa(bal)}\n`;
+          } else if (bal < 0) {
+            msg += `🔴 *${p}*: owes ${MathEngine.formatPaisa(Math.abs(bal))}\n`;
+          } else {
+            msg += `⚪ *${p}*: settled up (Rs. 0.00)\n`;
+          }
+        }
+
+        msg += `\n_Calculated with Roomates Sheet • Exact Paisa Math_`;
+        return msg;
+      },
+
+      copyToClipboard(text, callback) {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(() => callback(true)).catch(() => this.fallbackCopy(text, callback));
+        } else {
+          this.fallbackCopy(text, callback);
+        }
+      },
+
+      fallbackCopy(text, callback) {
+        try {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          callback(successful);
+        } catch (err) {
+          callback(false);
+        }
+      }
+    };
+
+    /* =====================================================================
+       6. APPLICATION STATE & CONTROLLER
+       ===================================================================== */
+    const AppState = {
+      roommates: [],
+      entries: [],
+      currentUser: "Sanaullah",
+      roomId: "FLAT-402",
+      activeTab: 'dashboard',
+      filterType: 'all',
+      filterRoommate: 'all',
+      searchQuery: '',
+      editingEntryId: null,
+      parsedBulkEntries: [],
+      discoveredBulkPeople: [],
+      entryToDelete: null,
+      theme: 'system'
+    };
+
+    const DOM = {};
+
+    function initDOMReferences() {
+      DOM.body = document.body;
+      DOM.themeIcon = document.getElementById('theme-icon');
+      DOM.btnToggleTheme = document.getElementById('btn-toggle-theme');
+      DOM.btnOpenBenchmark = document.getElementById('btn-open-benchmark');
+      DOM.btnOpenWhatsApp = document.getElementById('btn-open-whatsapp');
+      DOM.btnBrandHome = document.getElementById('btn-brand-home');
+      DOM.navTabs = document.querySelectorAll('.nav-tab');
+      DOM.tabViews = document.querySelectorAll('.tab-view');
+      DOM.fabAdd = document.getElementById('fab-add-trans');
+      DOM.benchmarkHeaderStatus = document.getElementById('benchmark-header-status');
+
+      // User profile & Cloud Share Header Elements
+      DOM.btnUserProfile = document.getElementById('btn-user-profile');
+      DOM.headerUserAvatar = document.getElementById('header-user-avatar');
+      DOM.headerUserName = document.getElementById('header-user-name');
+      DOM.btnOpenCloudShare = document.getElementById('btn-open-cloud-share');
+      DOM.cloudHeaderStatus = document.getElementById('cloud-header-status');
+
+      // Dashboard
+      DOM.statTotalSpend = document.getElementById('stat-total-spend');
+      DOM.statDirectTransfers = document.getElementById('stat-direct-transfers');
+      DOM.statTransfersCount = document.getElementById('stat-transfers-count');
+      DOM.statRoommatesCount = document.getElementById('stat-roommates-count');
+      DOM.statSharedCount = document.getElementById('stat-shared-count');
+      DOM.statPayCount = document.getElementById('stat-pay-count');
+      DOM.settlementsList = document.getElementById('settlements-list');
+      DOM.settlementsBadge = document.getElementById('settlements-badge');
+      DOM.balancesGrid = document.getElementById('balances-grid');
+      DOM.btnDashWhatsApp = document.getElementById('btn-dash-whatsapp');
+      DOM.btnQuickAddTrans = document.getElementById('btn-quick-add-trans');
+      DOM.bannerRoomCode = document.getElementById('banner-room-code');
+      DOM.btnBannerWhatsapp = document.getElementById('btn-banner-whatsapp');
+      DOM.btnBannerCloud = document.getElementById('btn-banner-cloud');
+
+      // Entries
+      DOM.entriesListContainer = document.getElementById('entries-list-container');
+      DOM.entriesCountBadge = document.getElementById('entries-count-badge');
+      DOM.filterSearch = document.getElementById('filter-search');
+      DOM.filterPills = document.querySelectorAll('.filter-pill');
+      DOM.filterRoommate = document.getElementById('filter-roommate');
+
+      // Form
+      DOM.transactionForm = document.getElementById('transaction-form');
+      DOM.formHeading = document.getElementById('form-heading');
+      DOM.entryEditId = document.getElementById('entry-edit-id');
+      DOM.btnTypeShare = document.getElementById('btn-type-share');
+      DOM.btnTypePay = document.getElementById('btn-type-pay');
+      DOM.fieldsShare = document.getElementById('fields-share');
+      DOM.fieldsPay = document.getElementById('fields-pay');
+      DOM.inputAmount = document.getElementById('input-amount');
+      DOM.paisaPreview = document.getElementById('paisa-preview');
+      DOM.inputDate = document.getElementById('input-date');
+      DOM.inputDesc = document.getElementById('input-desc');
+      DOM.selectPayer = document.getElementById('select-payer');
+      DOM.sharersSelectorGrid = document.getElementById('sharers-selector-grid');
+      DOM.btnSelectAllSharers = document.getElementById('btn-select-all-sharers');
+      DOM.btnClearSharers = document.getElementById('btn-clear-sharers');
+      DOM.selectPayFrom = document.getElementById('select-pay-from');
+      DOM.selectPayTo = document.getElementById('select-pay-to');
+      DOM.splitLivePreview = document.getElementById('split-live-preview');
+      DOM.previewSharersCount = document.getElementById('preview-sharers-count');
+      DOM.previewSharesDetail = document.getElementById('preview-shares-detail');
+      DOM.btnSubmitEntry = document.getElementById('btn-submit-entry');
+      DOM.btnSubmitText = document.getElementById('btn-submit-text');
+      DOM.btnCancelEdit = document.getElementById('btn-cancel-edit');
+
+      // Importer
+      DOM.bulkTextarea = document.getElementById('bulk-textarea');
+      DOM.btnLoadSampleBulk = document.getElementById('btn-load-sample-bulk');
+      DOM.btnParseBulk = document.getElementById('btn-parse-bulk');
+      DOM.chkAutoAddPeople = document.getElementById('chk-auto-add-people');
+      DOM.bulkDiagnosticBox = document.getElementById('bulk-diagnostic-box');
+      DOM.bulkDiagnosticList = document.getElementById('bulk-diagnostic-list');
+      DOM.bulkPreviewSection = document.getElementById('bulk-preview-section');
+      DOM.parsedValidCount = document.getElementById('parsed-valid-count');
+      DOM.bulkPreviewTbody = document.getElementById('bulk-preview-tbody');
+      DOM.chkBulkMaster = document.getElementById('chk-bulk-master');
+      DOM.btnBulkToggleAll = document.getElementById('btn-bulk-toggle-all');
+      DOM.btnCommitBulk = document.getElementById('btn-commit-bulk');
+
+      // Roommates & Settings
+      DOM.addRoommateForm = document.getElementById('add-roommate-form');
+      DOM.inputNewRoommate = document.getElementById('input-new-roommate');
+      DOM.roommatesChipsContainer = document.getElementById('roommates-chips-container');
+      DOM.roommatesActiveBadge = document.getElementById('roommates-active-badge');
+      DOM.settingsCloudStatusBadge = document.getElementById('settings-cloud-status-badge');
+      DOM.btnSettingsOpenShare = document.getElementById('btn-settings-open-share');
+      DOM.btnExportBackup = document.getElementById('btn-export-backup');
+      DOM.fileImportBackup = document.getElementById('file-import-backup');
+      DOM.btnLoadBenchmarkPreset = document.getElementById('btn-load-benchmark-preset');
+      DOM.btnClearAllData = document.getElementById('btn-clear-all-data');
+
+      // Modals
+      DOM.modalWhatsApp = document.getElementById('modal-whatsapp');
+      DOM.whatsappPreviewContent = document.getElementById('whatsapp-preview-content');
+      DOM.btnCopyWhatsApp = document.getElementById('btn-copy-whatsapp');
+      DOM.btnOpenWhatsAppLink = document.getElementById('btn-open-whatsapp-link');
+
+      DOM.modalUserProfile = document.getElementById('modal-user-profile');
+      DOM.userProfileList = document.getElementById('user-profile-list');
+      DOM.formQuickAddUser = document.getElementById('form-quick-add-user');
+      DOM.inputQuickUserName = document.getElementById('input-quick-user-name');
+
+      DOM.modalCloudShare = document.getElementById('modal-cloud-share');
+      DOM.cloudModalStatusBadge = document.getElementById('cloud-modal-status-badge');
+      DOM.inputRoomCode = document.getElementById('input-room-code');
+      DOM.btnUpdateRoomCode = document.getElementById('btn-update-room-code');
+      DOM.btnShareRoomWhatsapp = document.getElementById('btn-share-room-whatsapp');
+      DOM.btnCopyRoomLink = document.getElementById('btn-copy-room-link');
+      DOM.btnToggleFirebaseHelp = document.getElementById('btn-toggle-firebase-help');
+      DOM.firebaseHelpDrawer = document.getElementById('firebase-help-drawer');
+      DOM.firebaseConfigInput = document.getElementById('firebase-config-input');
+      DOM.btnConnectFirebase = document.getElementById('btn-connect-firebase');
+      DOM.btnDisconnectFirebase = document.getElementById('btn-disconnect-firebase');
+
+      DOM.modalBenchmark = document.getElementById('modal-benchmark');
+      DOM.benchmarkResultsContainer = document.getElementById('benchmark-results-container');
+      DOM.btnRerunBenchmark = document.getElementById('btn-rerun-benchmark');
+
+      DOM.modalDelete = document.getElementById('modal-delete');
+      DOM.deleteConfirmText = document.getElementById('delete-confirm-text');
+      DOM.btnConfirmDelete = document.getElementById('btn-confirm-delete');
+
+      DOM.toastContainer = document.getElementById('toast-container');
+    }
+
+    /* =====================================================================
+       7. UI RENDERING & CONTROLLER LOGIC
+       ===================================================================== */
+    function showToast(message, duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>${message}</span>
+      `;
+      DOM.toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, duration);
+    }
+
+    function switchTab(tabName) {
+      AppState.activeTab = tabName;
+      DOM.navTabs.forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === tabName);
+      });
+      DOM.tabViews.forEach(view => {
+        view.classList.toggle('active', view.id === `view-${tabName}`);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function applyTheme(theme) {
+      AppState.theme = theme;
+      Storage.saveTheme(theme);
+      
+      let effectiveTheme = theme;
+      if (theme === 'system') {
+        effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      DOM.body.setAttribute('data-theme', effectiveTheme);
+
+      if (effectiveTheme === 'dark') {
+        DOM.themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+      } else {
+        DOM.themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+      }
+    }
+
+    function setCurrentUser(userName) {
+      AppState.currentUser = userName;
+      Storage.saveCurrentUser(userName);
+      
+      DOM.headerUserName.textContent = userName;
+      DOM.headerUserAvatar.textContent = userName.charAt(0).toUpperCase();
+      DOM.headerUserAvatar.style.background = getAvatarColor(userName);
+
+      // Auto-set form defaults to logged-in user
+      if (AppState.roommates.includes(userName)) {
+        DOM.selectPayer.value = userName;
+        DOM.selectPayFrom.value = userName;
+      }
+      renderUserProfileModalList();
+    }
+
+    function renderUserProfileModalList() {
+      DOM.userProfileList.innerHTML = AppState.roommates.map(p => {
+        const isActive = p === AppState.currentUser;
+        return `
+          <div class="user-select-card ${isActive ? 'active' : ''}" onclick="selectUserProfile('${escapeHTML(p)}')">
+            <div class="avatar" style="width: 32px; height: 32px; font-size: 0.8rem; background: ${getAvatarColor(p)}">${p.charAt(0)}</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(p)}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">${isActive ? 'Active on this device' : 'Tap to switch'}</div>
+            </div>
+            ${isActive ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectUserProfile(name) {
+      setCurrentUser(name);
+      DOM.modalUserProfile.classList.remove('open');
+      showToast(`Active profile: ${name}`);
+    }
+
+    function syncStateToStorageAndCloud() {
+      Storage.saveRoommates(AppState.roommates);
+      Storage.saveEntries(AppState.entries);
+
+      if (cloudAdapter && cloudAdapter.isConnected) {
+        cloudAdapter.pushData(AppState.roommates, AppState.entries);
+      }
+    }
+
+    function renderDashboard() {
+      const { balances, ledgers } = MathEngine.calculateBalances(AppState.roommates, AppState.entries);
+      const settlements = MathEngine.calculateSettlements(balances);
+
+      // 1. Stats
+      let totalSharedPaisa = 0;
+      let totalDirectPaisa = 0;
+      let sharedCount = 0;
+      let payCount = 0;
+
+      AppState.entries.forEach(e => {
+        if (e.type === 'share') {
+          totalSharedPaisa += e.amount;
+          sharedCount++;
+        } else if (e.type === 'pay') {
+          totalDirectPaisa += e.amount;
+          payCount++;
+        }
+      });
+
+      DOM.statTotalSpend.textContent = MathEngine.formatPaisa(totalSharedPaisa);
+      DOM.statSharedCount.textContent = `${sharedCount} shared expense${sharedCount === 1 ? '' : 's'}`;
+      DOM.statDirectTransfers.textContent = MathEngine.formatPaisa(totalDirectPaisa);
+      DOM.statPayCount.textContent = `${payCount} direct payment${payCount === 1 ? '' : 's'}`;
+      DOM.statTransfersCount.textContent = settlements.length;
+      DOM.statRoommatesCount.textContent = AppState.roommates.length;
+      DOM.bannerRoomCode.textContent = AppState.roomId;
+
+      // 2. Optimal Settlements List
+      DOM.settlementsBadge.textContent = `${settlements.length} Transfer${settlements.length === 1 ? '' : 's'} Needed`;
+      
+      if (settlements.length === 0) {
+        DOM.settlementsList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <strong>All Flatmates Settled Up!</strong>
+            <span style="font-size: 0.85rem;">Every roommate's net balance is strictly zero. No cash transfers required.</span>
+          </div>
+        `;
+      } else {
+        DOM.settlementsList.innerHTML = settlements.map(s => `
+          <div class="settlement-card">
+            <div class="settlement-flow">
+              <div class="person-chip" title="Debtor: ${s.from}">
+                <div class="avatar avatar-debtor">${s.from.charAt(0)}</div>
+                <div class="person-name">${escapeHTML(s.from)}</div>
+              </div>
+
+              <div class="flow-arrow-wrap">
+                <span class="flow-badge">pays</span>
+                <div class="flow-arrow">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </div>
+              </div>
+
+              <div class="person-chip" title="Creditor: ${s.to}">
+                <div class="avatar avatar-creditor">${s.to.charAt(0)}</div>
+                <div class="person-name">${escapeHTML(s.to)}</div>
+              </div>
+            </div>
+
+            <div class="settlement-amount-wrap">
+              <div class="settlement-amount">${MathEngine.formatPaisa(s.amount)}</div>
+              <div class="settlement-actions">
+                <button class="btn btn-secondary btn-sm" onclick="quickRecordPayment('${escapeHTML(s.from)}', '${escapeHTML(s.to)}', ${s.amount})" title="Record as Direct Payment">
+                  Record Paid
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 3. Balances & Ledger Grid
+      DOM.balancesGrid.innerHTML = AppState.roommates.map(person => {
+        const bal = balances[person] || 0;
+        const ledger = ledgers[person] || { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+        
+        let cardClass = 'settled';
+        let statusBadge = `<span class="badge" style="background: var(--bg-card-subtle); color: var(--text-muted);">Settled</span>`;
+        let balClass = 'zero';
+
+        if (bal > 0) {
+          cardClass = 'receivable';
+          statusBadge = `<span class="badge badge-emerald">Gets Money</span>`;
+          balClass = 'positive';
+        } else if (bal < 0) {
+          cardClass = 'debt';
+          statusBadge = `<span class="badge badge-rose">Owes Money</span>`;
+          balClass = 'negative';
+        }
+
+        const isMe = person === AppState.currentUser;
+
+        return `
+          <div class="balance-card ${cardClass}" title="${escapeHTML(person)}'s balance card">
+            <div class="balance-card-header">
+              <div class="balance-person-info">
+                <div class="avatar" style="background: ${getAvatarColor(person)}">${person.charAt(0)}</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 1rem; color: var(--text-main);">
+                    ${escapeHTML(person)} ${isMe ? '<span style="font-size: 0.7rem; color: var(--teal-primary); font-weight: 600;">(You)</span>' : ''}
+                  </div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">${bal >= 0 ? 'Net Receivable' : 'Net Debt'}</div>
+                </div>
+              </div>
+              ${statusBadge}
+            </div>
+
+            <div class="balance-val ${balClass}">
+              ${bal > 0 ? '+' : ''}${MathEngine.formatPaisa(bal)}
+            </div>
+
+            <div class="balance-breakdown">
+              <div class="breakdown-item">Paid for shared: <strong>${MathEngine.formatPaisa(ledger.paidShared)}</strong></div>
+              <div class="breakdown-item">Cost of shares: <strong>${MathEngine.formatPaisa(ledger.shareCost)}</strong></div>
+              <div class="breakdown-item">Direct sent: <strong>${MathEngine.formatPaisa(ledger.paySent)}</strong></div>
+              <div class="breakdown-item">Direct received: <strong>${MathEngine.formatPaisa(ledger.payReceived)}</strong></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderEntries() {
+      let filtered = [...AppState.entries];
+
+      if (AppState.filterType !== 'all') {
+        filtered = filtered.filter(e => e.type === AppState.filterType);
+      }
+
+      if (AppState.filterRoommate !== 'all') {
+        const p = AppState.filterRoommate;
+        filtered = filtered.filter(e => {
+          if (e.type === 'share') return e.payer === p || (e.sharers && e.sharers.includes(p));
+          if (e.type === 'pay') return e.from === p || e.to === p;
+          return false;
+        });
+      }
+
+      if (AppState.searchQuery) {
+        const q = AppState.searchQuery.toLowerCase();
+        filtered = filtered.filter(e => {
+          const descMatch = (e.desc || '').toLowerCase().includes(q);
+          const payerMatch = (e.payer || '').toLowerCase().includes(q);
+          const fromMatch = (e.from || '').toLowerCase().includes(q);
+          const toMatch = (e.to || '').toLowerCase().includes(q);
+          const amtMatch = MathEngine.formatPaisa(e.amount).toLowerCase().includes(q);
+          return descMatch || payerMatch || fromMatch || toMatch || amtMatch;
+        });
+      }
+
+      filtered.sort((a, b) => {
+        if (b.date !== a.date) return b.date.localeCompare(a.date);
+        return String(b.id).localeCompare(String(a.id));
+      });
+
+      DOM.entriesCountBadge.textContent = `${filtered.length} of ${AppState.entries.length} Entries`;
+
+      if (filtered.length === 0) {
+        DOM.entriesListContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <strong>No matching transactions found</strong>
+            <span style="font-size: 0.85rem;">Try adjusting your search terms or filters.</span>
+          </div>
+        `;
+        return;
+      }
+
+      DOM.entriesListContainer.innerHTML = filtered.map(e => {
+        const isShare = e.type === 'share';
+        const formattedDate = new Date(e.date + 'T00:00:00').toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        let detailMeta = '';
+        if (isShare) {
+          const N = (e.sharers || []).length;
+          const perPerson = N > 0 ? MathEngine.formatPaisa(Math.floor(e.amount / N)) : 'Rs. 0';
+          detailMeta = `<span>Paid by <strong>${escapeHTML(e.payer)}</strong></span> • <span>${N} sharers (${perPerson} avg)</span>`;
+        } else {
+          detailMeta = `<span><strong>${escapeHTML(e.from)}</strong> paid <strong>${escapeHTML(e.to)}</strong></span>`;
+        }
+
+        const byTag = e.by ? `• <span style="color: var(--teal-primary);">by ${escapeHTML(e.by)}</span>` : '';
+
+        return `
+          <div class="entry-card">
+            <div class="entry-left">
+              <div class="entry-icon-box ${isShare ? 'entry-icon-share' : 'entry-icon-pay'}">
+                ${isShare 
+                  ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`
+                  : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`
+                }
+              </div>
+
+              <div class="entry-info">
+                <div class="entry-title">${escapeHTML(e.desc)}</div>
+                <div class="entry-meta">
+                  <span>${formattedDate}</span>
+                  <span>•</span>
+                  ${detailMeta}
+                  ${byTag}
+                </div>
+              </div>
+            </div>
+
+            <div class="entry-right">
+              <div class="entry-amount">${MathEngine.formatPaisa(e.amount)}</div>
+              <div class="entry-actions">
+                <button class="entry-action-btn" onclick="startEditEntry('${e.id}')" title="Edit Entry">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="entry-action-btn btn-del" onclick="promptDeleteEntry('${e.id}')" title="Delete Entry">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRoommates() {
+      DOM.roommatesActiveBadge.textContent = `${AppState.roommates.length} Flatmates`;
+
+      DOM.roommatesChipsContainer.innerHTML = AppState.roommates.map(person => `
+        <div class="roommate-tag">
+          <div class="avatar" style="width: 24px; height: 24px; font-size: 0.72rem; background: ${getAvatarColor(person)}">${person.charAt(0)}</div>
+          <span>${escapeHTML(person)}</span>
+          <button type="button" class="roommate-tag-del" onclick="deleteRoommate('${escapeHTML(person)}')" title="Remove ${escapeHTML(person)}">✕</button>
+        </div>
+      `).join('');
+
+      const options = AppState.roommates.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+      DOM.selectPayer.innerHTML = options;
+      DOM.selectPayFrom.innerHTML = options;
+      DOM.selectPayTo.innerHTML = options;
+
+      // Default to logged-in user
+      if (AppState.roommates.includes(AppState.currentUser)) {
+        DOM.selectPayer.value = AppState.currentUser;
+        DOM.selectPayFrom.value = AppState.currentUser;
+      }
+
+      if (AppState.roommates.length > 1) {
+        const other = AppState.roommates.find(p => p !== AppState.currentUser) || AppState.roommates[1];
+        DOM.selectPayTo.value = other;
+      }
+
+      DOM.filterRoommate.innerHTML = `<option value="all">All Roommates</option>` + options;
+      DOM.filterRoommate.value = AppState.filterRoommate;
+
+      renderSharersCheckboxes();
+      renderUserProfileModalList();
+    }
+
+    function renderSharersCheckboxes(selectedSharers = null) {
+      const activeSharers = selectedSharers || [...AppState.roommates];
+      DOM.sharersSelectorGrid.innerHTML = AppState.roommates.map(p => {
+        const isSelected = activeSharers.includes(p);
+        return `
+          <label class="sharer-checkbox-card ${isSelected ? 'selected' : ''}" data-person="${escapeHTML(p)}">
+            <input type="checkbox" value="${escapeHTML(p)}" ${isSelected ? 'checked' : ''}>
+            <div class="custom-check">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display: ${isSelected ? 'block' : 'none'};"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>${escapeHTML(p)}</span>
+          </label>
+        `;
+      }).join('');
+
+      DOM.sharersSelectorGrid.querySelectorAll('.sharer-checkbox-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          const checkbox = card.querySelector('input');
+          checkbox.checked = !checkbox.checked;
+          card.classList.toggle('selected', checkbox.checked);
+          card.querySelector('.custom-check svg').style.display = checkbox.checked ? 'block' : 'none';
+          updateLiveSplitPreview();
+        });
+      });
+
+      updateLiveSplitPreview();
+    }
+
+    function getSelectedSharers() {
+      const selected = [];
+      DOM.sharersSelectorGrid.querySelectorAll('.sharer-checkbox-card').forEach(card => {
+        if (card.querySelector('input').checked) {
+          selected.push(card.dataset.person);
+        }
+      });
+      return selected;
+    }
+
+    function updateLiveSplitPreview() {
+      const amountPaisa = MathEngine.rupeesToPaisa(DOM.inputAmount.value);
+      DOM.paisaPreview.textContent = `${amountPaisa.toLocaleString()} paisa`;
+
+      const sharers = getSelectedSharers();
+      DOM.previewSharersCount.textContent = `${sharers.length} sharer${sharers.length === 1 ? '' : 's'}`;
+
+      if (amountPaisa <= 0 || sharers.length === 0) {
+        DOM.previewSharesDetail.textContent = 'Enter an amount and select at least one roommate to preview split.';
+        return;
+      }
+
+      const shares = MathEngine.calculateSplitShares(amountPaisa, sharers);
+      const N = sharers.length;
+      const base_share = Math.floor(amountPaisa / N);
+      const remainder = amountPaisa - (base_share * N);
+
+      let detailHtml = `<div style="margin-bottom: 4px; font-weight: 500;">`;
+      if (remainder > 0) {
+        detailHtml += `Exact distribution: ${remainder} flatmate${remainder === 1 ? '' : 's'} allocated 1 paisa remainder to balance exactly.`;
+      } else {
+        detailHtml += `Exact distribution: ${MathEngine.formatPaisa(base_share)} per person.`;
+      }
+      detailHtml += `</div><div style="display: flex; flex-wrap: wrap; gap: 8px;">`;
+
+      sharers.forEach(p => {
+        detailHtml += `<span style="background: var(--bg-card); padding: 2px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);"><strong>${escapeHTML(p)}</strong>: ${MathEngine.formatPaisa(shares[p])}</span>`;
+      });
+      detailHtml += `</div>`;
+
+      DOM.previewSharesDetail.innerHTML = detailHtml;
+    }
+
+    function resetForm() {
+      AppState.editingEntryId = null;
+      DOM.entryEditId.value = '';
+      DOM.transactionForm.reset();
+      DOM.inputDate.value = new Date().toISOString().split('T')[0];
+      DOM.formHeading.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        Add New Transaction
+      `;
+      DOM.btnSubmitText.textContent = 'Record Shared Expense';
+      DOM.btnCancelEdit.style.display = 'none';
+
+      setTransactionType('share');
+      if (AppState.roommates.includes(AppState.currentUser)) {
+        DOM.selectPayer.value = AppState.currentUser;
+        DOM.selectPayFrom.value = AppState.currentUser;
+      }
+      renderSharersCheckboxes();
+    }
+
+    function setTransactionType(type) {
+      if (type === 'share') {
+        DOM.btnTypeShare.classList.add('active');
+        DOM.btnTypePay.classList.remove('active');
+        DOM.fieldsShare.style.display = 'block';
+        DOM.fieldsPay.style.display = 'none';
+        DOM.btnSubmitText.textContent = AppState.editingEntryId ? 'Update Shared Expense' : 'Record Shared Expense';
+      } else {
+        DOM.btnTypeShare.classList.remove('active');
+        DOM.btnTypePay.classList.add('active');
+        DOM.fieldsShare.style.display = 'none';
+        DOM.fieldsPay.style.display = 'block';
+        DOM.btnSubmitText.textContent = AppState.editingEntryId ? 'Update Direct Payment' : 'Record Direct Payment';
+      }
+    }
+
+    function startEditEntry(entryId) {
+      const entry = AppState.entries.find(e => String(e.id) === String(entryId));
+      if (!entry) return;
+
+      AppState.editingEntryId = entry.id;
+      DOM.entryEditId.value = entry.id;
+      DOM.inputAmount.value = (entry.amount / 100).toFixed(2);
+      DOM.inputDate.value = entry.date;
+      DOM.inputDesc.value = entry.desc;
+
+      DOM.formHeading.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        Edit Transaction
+      `;
+      DOM.btnCancelEdit.style.display = 'inline-flex';
+
+      if (entry.type === 'share') {
+        setTransactionType('share');
+        DOM.selectPayer.value = entry.payer;
+        renderSharersCheckboxes(entry.sharers);
+      } else {
+        setTransactionType('pay');
+        DOM.selectPayFrom.value = entry.from;
+        DOM.selectPayTo.value = entry.to;
+      }
+
+      updateLiveSplitPreview();
+      switchTab('add');
+    }
+
+    function quickRecordPayment(debtor, creditor, amountPaisa) {
+      resetForm();
+      setTransactionType('pay');
+      DOM.selectPayFrom.value = debtor;
+      DOM.selectPayTo.value = creditor;
+      DOM.inputAmount.value = (amountPaisa / 100).toFixed(2);
+      DOM.inputDesc.value = `Settlement: ${debtor} to ${creditor}`;
+      updateLiveSplitPreview();
+      switchTab('add');
+    }
+
+    function promptDeleteEntry(entryId) {
+      AppState.entryToDelete = entryId;
+      DOM.modalDelete.classList.add('open');
+    }
+
+    function deleteRoommate(name) {
+      const hasTransactions = AppState.entries.some(e => {
+        if (e.type === 'share') return e.payer === name || (e.sharers && e.sharers.includes(name));
+        if (e.type === 'pay') return e.from === name || e.to === name;
+        return false;
+      });
+
+      if (hasTransactions) {
+        alert(`Cannot remove "${name}": this flatmate is involved in existing transactions. Please delete or reassign their transactions first.`);
+        return;
+      }
+
+      if (AppState.roommates.length <= 2) {
+        alert('A minimum of 2 flatmates is required.');
+        return;
+      }
+
+      AppState.roommates = AppState.roommates.filter(r => r !== name);
+      if (AppState.currentUser === name) {
+        setCurrentUser(AppState.roommates[0]);
+      }
+      syncStateToStorageAndCloud();
+      renderRoommates();
+      renderDashboard();
+      showToast(`Removed flatmate "${name}"`);
+    }
+
+    /* =====================================================================
+       8. BULK IMPORTER HANDLERS
+       ===================================================================== */
+    function handleParseBulk() {
+      const text = DOM.bulkTextarea.value;
+      const { parsed, errors, discoveredPeople } = ImporterEngine.parseLines(text, AppState.roommates, AppState.entries);
+      
+      AppState.parsedBulkEntries = parsed;
+      AppState.discoveredBulkPeople = discoveredPeople;
+
+      if (errors.length > 0) {
+        DOM.bulkDiagnosticBox.style.display = 'block';
+        DOM.bulkDiagnosticList.innerHTML = errors.map(err => `<li>${escapeHTML(err)}</li>`).join('');
+      } else {
+        DOM.bulkDiagnosticBox.style.display = 'none';
+        DOM.bulkDiagnosticList.innerHTML = '';
+      }
+
+      if (parsed.length === 0) {
+        DOM.bulkPreviewSection.style.display = 'none';
+        showToast(errors.length > 0 ? 'Parsing finished with errors' : 'No entries found in input');
+        return;
+      }
+
+      DOM.bulkPreviewSection.style.display = 'block';
+      DOM.parsedValidCount.textContent = parsed.length;
+
+      DOM.bulkPreviewTbody.innerHTML = parsed.map((item, idx) => {
+        const isShare = item.type === 'share';
+        const parties = isShare 
+          ? `Payer: <strong>${escapeHTML(item.payer)}</strong> (${item.sharers.length} sharers)`
+          : `From: <strong>${escapeHTML(item.from)}</strong> ➔ To: <strong>${escapeHTML(item.to)}</strong>`;
+
+        return `
+          <tr class="${item.isDuplicate ? 'duplicate-row' : ''}">
+            <td>
+              <input type="checkbox" class="chk-bulk-row" data-idx="${idx}" ${item.selected ? 'checked' : ''}>
+            </td>
+            <td><span class="badge ${isShare ? 'badge-teal' : 'badge-amber'}">${item.type.toUpperCase()}</span></td>
+            <td>${item.date}</td>
+            <td>${escapeHTML(item.desc)}</td>
+            <td><strong>${MathEngine.formatPaisa(item.amount)}</strong></td>
+            <td>${parties}</td>
+            <td>
+              ${item.isDuplicate 
+                ? `<span class="badge badge-amber" title="Matches existing transaction in date, amount, and parties">Duplicate</span>` 
+                : `<span class="badge badge-emerald">Ready</span>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      DOM.bulkPreviewTbody.querySelectorAll('.chk-bulk-row').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+          const idx = parseInt(e.target.dataset.idx, 10);
+          AppState.parsedBulkEntries[idx].selected = e.target.checked;
+        });
+      });
+
+      showToast(`Parsed ${parsed.length} valid entries`);
+    }
+
+    function handleCommitBulk() {
+      const selected = AppState.parsedBulkEntries.filter(e => e.selected);
+      if (selected.length === 0) {
+        alert('Please select at least one entry to commit.');
+        return;
+      }
+
+      if (DOM.chkAutoAddPeople.checked && AppState.discoveredBulkPeople.length > 0) {
+        AppState.discoveredBulkPeople.forEach(person => {
+          if (!AppState.roommates.includes(person)) {
+            AppState.roommates.push(person);
+          }
+        });
+      }
+
+      const newEntries = selected.map((item, idx) => ({
+        id: `bulk_${Date.now()}_${idx}`,
+        type: item.type,
+        amount: item.amount,
+        date: item.date,
+        desc: item.desc,
+        payer: item.payer,
+        sharers: item.sharers,
+        from: item.from,
+        to: item.to,
+        by: item.by || AppState.currentUser
+      }));
+
+      AppState.entries.push(...newEntries);
+      syncStateToStorageAndCloud();
+
+      renderRoommates();
+      renderDashboard();
+      renderEntries();
+      DOM.bulkTextarea.value = '';
+      DOM.bulkPreviewSection.style.display = 'none';
+      switchTab('dashboard');
+      showToast(`Successfully imported ${newEntries.length} entries!`);
+    }
+
+    /* =====================================================================
+       9. CLOUD SYNC & ROOM CODE LOGIC
+       ===================================================================== */
+    function getShareableRoomUrl() {
+      const base = window.location.origin + window.location.pathname;
+      return `${base}?room=${encodeURIComponent(AppState.roomId)}`;
+    }
+
+    function initCloudSync() {
+      DOM.inputRoomCode.value = AppState.roomId;
+      const fbConfig = Storage.getFirebaseConfig();
+      if (fbConfig) {
+        DOM.firebaseConfigInput.value = JSON.stringify(fbConfig, null, 2);
+        connectFirebase(fbConfig, false);
+      } else {
+        updateCloudStatusBadge(false);
+      }
+    }
+
+    function updateCloudStatusBadge(connected) {
+      if (connected) {
+        DOM.cloudHeaderStatus.textContent = `Live: ${AppState.roomId}`;
+        DOM.cloudModalStatusBadge.className = "badge badge-emerald";
+        DOM.cloudModalStatusBadge.textContent = "🟢 Live Cloud Sync";
+        DOM.settingsCloudStatusBadge.className = "badge badge-emerald";
+        DOM.settingsCloudStatusBadge.textContent = `🟢 Connected (${AppState.roomId})`;
+      } else {
+        DOM.cloudHeaderStatus.textContent = `Room: ${AppState.roomId}`;
+        DOM.cloudModalStatusBadge.className = "badge badge-teal";
+        DOM.cloudModalStatusBadge.textContent = "Local-First Mode";
+        DOM.settingsCloudStatusBadge.className = "badge badge-teal";
+        DOM.settingsCloudStatusBadge.textContent = `Local Mode (${AppState.roomId})`;
+      }
+    }
+
+    function connectFirebase(config, showNotification = true) {
+      try {
+        if (cloudAdapter) cloudAdapter.disconnect();
+        cloudAdapter = new FirestoreAdapter(config, AppState.roomId, (remoteRoommates, remoteEntries) => {
+          if (remoteRoommates && remoteRoommates.length > 0) {
+            AppState.roommates = remoteRoommates;
+            Storage.saveRoommates(remoteRoommates);
+          }
+          if (remoteEntries) {
+            AppState.entries = remoteEntries;
+            Storage.saveEntries(remoteEntries);
+          }
+          renderRoommates();
+          renderDashboard();
+          renderEntries();
+          showToast('⚡ Live cloud update received!');
+        });
+
+        const success = cloudAdapter.init();
+        if (success) {
+          Storage.saveFirebaseConfig(config);
+          updateCloudStatusBadge(true);
+          if (showNotification) showToast(`Connected to Firebase Room: ${AppState.roomId}`);
+        } else {
+          updateCloudStatusBadge(false);
+          if (showNotification) alert('Failed connecting to Firebase. Check your config object.');
+        }
+      } catch (err) {
+        console.error('Firebase connection error:', err);
+        updateCloudStatusBadge(false);
+        if (showNotification) alert('Error initializing Firebase: ' + err.message);
+      }
+    }
+
+    function disconnectFirebase() {
+      if (cloudAdapter) {
+        cloudAdapter.disconnect();
+        cloudAdapter = null;
+      }
+      Storage.saveFirebaseConfig(null);
+      DOM.firebaseConfigInput.value = '';
+      updateCloudStatusBadge(false);
+      showToast('Switched to Local-Only mode.');
+    }
+
+    /* =====================================================================
+       10. BENCHMARK ACCEPTANCE TEST RUNNER
+       ===================================================================== */
+    function runBenchmarkSuite() {
+      DOM.modalBenchmark.classList.add('open');
+      const container = DOM.benchmarkResultsContainer;
+      container.innerHTML = `<div style="text-align: center; padding: 20px;">Running benchmark calculations...</div>`;
+
+      setTimeout(() => {
+        const { balances } = MathEngine.calculateBalances(BENCHMARK_ROOMMATES, BENCHMARK_ENTRIES);
+        const settlements = MathEngine.calculateSettlements(balances);
+
+        const tests = [
+          {
+            name: "Sum of All Net Balances is strictly zero paisa",
+            expected: 0,
+            actual: Object.values(balances).reduce((sum, b) => sum + b, 0),
+            pass: Object.values(balances).reduce((sum, b) => sum + b, 0) === 0,
+            detail: `Net zero-sum check: ${Object.values(balances).reduce((sum, b) => sum + b, 0)} paisa`
+          },
+          {
+            name: "Faizan net balance = +Rs. 2,580.84 (+258,084 paisa)",
+            expected: 258084,
+            actual: balances["Faizan"],
+            pass: balances["Faizan"] === 258084,
+            detail: `Calculated: ${MathEngine.formatPaisa(balances["Faizan"])} (${balances["Faizan"]} paisa)`
+          },
+          {
+            name: "Sanaullah net balance = +Rs. 840.83 (+84,083 paisa)",
+            expected: 84083,
+            actual: balances["Sanaullah"],
+            pass: balances["Sanaullah"] === 84083,
+            detail: `Calculated: ${MathEngine.formatPaisa(balances["Sanaullah"])} (${balances["Sanaullah"]} paisa)`
+          },
+          {
+            name: "Ahmed net balance = -Rs. 2,999.17 (-299,917 paisa)",
+            expected: -299917,
+            actual: balances["Ahmed"],
+            pass: balances["Ahmed"] === -299917,
+            detail: `Calculated: ${MathEngine.formatPaisa(balances["Ahmed"])} (${balances["Ahmed"]} paisa)`
+          },
+          {
+            name: "Ali net balance = -Rs. 422.50 (-42,250 paisa)",
+            expected: -42250,
+            actual: balances["Ali"],
+            pass: balances["Ali"] === -42250,
+            detail: `Calculated: ${MathEngine.formatPaisa(balances["Ali"])} (${balances["Ali"]} paisa)`
+          },
+          {
+            name: "Greedy settlement minimizes to 3 optimal transactions",
+            expected: 3,
+            actual: settlements.length,
+            pass: settlements.length === 3,
+            detail: settlements.map(s => `${s.from} ➔ ${s.to}: ${MathEngine.formatPaisa(s.amount)}`).join(' | ')
+          }
+        ];
+
+        const allPassed = tests.every(t => t.pass);
+
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: ${allPassed ? 'var(--emerald-bg)' : 'var(--rose-bg)'}; border-radius: var(--radius-md); margin-bottom: 8px;">
+            <div style="font-weight: 700; color: ${allPassed ? 'var(--emerald-receivable)' : 'var(--rose-debt)'};">
+              ${allPassed ? '✓ ALL 6 ACCEPTANCE BENCHMARKS PASSED (100%)' : '⚠ SOME BENCHMARKS FAILED'}
+            </div>
+            <span class="badge ${allPassed ? 'badge-emerald' : 'badge-rose'}">
+              ${tests.filter(t => t.pass).length} / ${tests.length} PASS
+            </span>
+          </div>
+
+          ${tests.map(t => `
+            <div class="benchmark-test-item ${t.pass ? 'pass' : ''}">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-weight: 600; color: var(--text-main);">${escapeHTML(t.name)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(t.detail)}</div>
+              </div>
+              <span class="badge ${t.pass ? 'badge-emerald' : 'badge-rose'}">${t.pass ? 'PASS' : 'FAIL'}</span>
+            </div>
+          `).join('')}
+        `;
+
+        DOM.benchmarkHeaderStatus.textContent = allPassed ? "100% Verified" : "Check Tests";
+      }, 150);
+    }
+
+    /* =====================================================================
+       11. UTILITIES & EVENT BINDINGS
+       ===================================================================== */
+    function escapeHTML(str) {
+      if (typeof str !== 'string') return String(str);
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    function getAvatarColor(name) {
+      const colors = [
+        'linear-gradient(135deg, #0d9488, #06b6d4)',
+        'linear-gradient(135deg, #3b82f6, #6366f1)',
+        'linear-gradient(135deg, #8b5cf6, #d946ef)',
+        'linear-gradient(135deg, #f59e0b, #ef4444)',
+        'linear-gradient(135deg, #10b981, #14b8a6)',
+        'linear-gradient(135deg, #64748b, #475569)'
+      ];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+      return colors[hash % colors.length];
+    }
+
+    function initEventListeners() {
+      // Theme Toggle
+      DOM.btnToggleTheme.addEventListener('click', () => {
+        const next = AppState.theme === 'light' ? 'dark' : (AppState.theme === 'dark' ? 'system' : 'light');
+        applyTheme(next);
+        showToast(`Theme: ${next.toUpperCase()}`);
+      });
+
+      // User Profile Modal
+      DOM.btnUserProfile.addEventListener('click', () => {
+        renderUserProfileModalList();
+        DOM.modalUserProfile.classList.add('open');
+      });
+
+      DOM.formQuickAddUser.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = DOM.inputQuickUserName.value.trim();
+        if (!name) return;
+        if (!AppState.roommates.includes(name)) {
+          AppState.roommates.push(name);
+          syncStateToStorageAndCloud();
+          renderRoommates();
+        }
+        setCurrentUser(name);
+        DOM.inputQuickUserName.value = '';
+        DOM.modalUserProfile.classList.remove('open');
+        showToast(`Logged in as: ${name}`);
+      });
+
+      // Cloud Sync & Room Share Modals
+      const openCloudModal = () => DOM.modalCloudShare.classList.add('open');
+      DOM.btnOpenCloudShare.addEventListener('click', openCloudModal);
+      DOM.btnBannerCloud.addEventListener('click', openCloudModal);
+      DOM.btnSettingsOpenShare.addEventListener('click', openCloudModal);
+
+      // Room Code Updates
+      DOM.btnUpdateRoomCode.addEventListener('click', () => {
+        const code = DOM.inputRoomCode.value.trim().toUpperCase();
+        if (!code) return;
+        AppState.roomId = code;
+        Storage.saveRoomId(code);
+        DOM.bannerRoomCode.textContent = code;
+        if (cloudAdapter) cloudAdapter.setRoomId(code);
+        updateCloudStatusBadge(cloudAdapter && cloudAdapter.isConnected);
+        showToast(`Room set to: ${code}`);
+      });
+
+      // WhatsApp Room Share Link
+      const shareRoomOnWhatsApp = () => {
+        const url = getShareableRoomUrl();
+        const text = `*Roomates Sheet Invite* 🏠\nHey flatmates! Join our room *${AppState.roomId}* on Roomates Sheet to log expenses together and see live debt settlements:\n${url}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+      };
+      DOM.btnShareRoomWhatsapp.addEventListener('click', shareRoomOnWhatsApp);
+      DOM.btnBannerWhatsapp.addEventListener('click', shareRoomOnWhatsApp);
+
+      DOM.btnCopyRoomLink.addEventListener('click', () => {
+        const url = getShareableRoomUrl();
+        WhatsAppFormatter.copyToClipboard(url, (ok) => {
+          showToast(ok ? 'Room link copied to clipboard!' : 'Failed to copy');
+        });
+      });
+
+      DOM.btnToggleFirebaseHelp.addEventListener('click', () => {
+        const current = DOM.firebaseHelpDrawer.style.display;
+        DOM.firebaseHelpDrawer.style.display = current === 'none' ? 'block' : 'none';
+      });
+
+      DOM.btnConnectFirebase.addEventListener('click', () => {
+        const raw = DOM.firebaseConfigInput.value.trim();
+        if (!raw) {
+          alert('Please paste your firebaseConfig object or JSON first.');
+          return;
+        }
+        try {
+          let config = null;
+          if (raw.startsWith('{')) {
+            config = JSON.parse(raw);
+          } else {
+            // Support const firebaseConfig = { ... } format
+            const jsonPart = raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1);
+            config = JSON.parse(jsonPart);
+          }
+          connectFirebase(config, true);
+        } catch(e) {
+          alert('Could not parse Firebase config. Please provide valid JSON.');
+        }
+      });
+
+      DOM.btnDisconnectFirebase.addEventListener('click', disconnectFirebase);
+
+      // Navigation Tabs
+      DOM.navTabs.forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+      });
+
+      DOM.fabAdd.addEventListener('click', () => {
+        resetForm();
+        switchTab('add');
+      });
+
+      DOM.btnBrandHome.addEventListener('click', () => switchTab('dashboard'));
+      DOM.btnQuickAddTrans.addEventListener('click', () => {
+        resetForm();
+        switchTab('add');
+      });
+
+      // Benchmark Modal
+      DOM.btnOpenBenchmark.addEventListener('click', runBenchmarkSuite);
+      DOM.btnRerunBenchmark.addEventListener('click', runBenchmarkSuite);
+
+      // WhatsApp Exporter Modal
+      function openWhatsAppModal() {
+        const { balances } = MathEngine.calculateBalances(AppState.roommates, AppState.entries);
+        const settlements = MathEngine.calculateSettlements(balances);
+        const text = WhatsAppFormatter.formatMessage(AppState.roommates, AppState.entries, balances, settlements);
+        DOM.whatsappPreviewContent.textContent = text;
+        DOM.btnOpenWhatsAppLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        DOM.modalWhatsApp.classList.add('open');
+      }
+
+      DOM.btnOpenWhatsApp.addEventListener('click', openWhatsAppModal);
+      DOM.btnDashWhatsApp.addEventListener('click', openWhatsAppModal);
+
+      DOM.btnCopyWhatsApp.addEventListener('click', () => {
+        const text = DOM.whatsappPreviewContent.textContent;
+        WhatsAppFormatter.copyToClipboard(text, (success) => {
+          showToast(success ? 'Copied WhatsApp summary to clipboard!' : 'Failed to copy');
+        });
+      });
+
+      // Close Modals
+      document.querySelectorAll('.btn-close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+        });
+      });
+
+      // Delete Entry Confirmation
+      DOM.btnConfirmDelete.addEventListener('click', () => {
+        if (!AppState.entryToDelete) return;
+        const entry = AppState.entries.find(e => String(e.id) === String(AppState.entryToDelete));
+        AppState.entries = AppState.entries.filter(e => String(e.id) !== String(AppState.entryToDelete));
+        syncStateToStorageAndCloud();
+        DOM.modalDelete.classList.remove('open');
+        renderDashboard();
+        renderEntries();
+        showToast(`Deleted "${entry ? entry.desc : 'Transaction'}"`);
+        AppState.entryToDelete = null;
+      });
+
+      // Filters
+      DOM.filterSearch.addEventListener('input', (e) => {
+        AppState.searchQuery = e.target.value;
+        renderEntries();
+      });
+
+      DOM.filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          DOM.filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          AppState.filterType = pill.dataset.type;
+          renderEntries();
+        });
+      });
+
+      DOM.filterRoommate.addEventListener('change', (e) => {
+        AppState.filterRoommate = e.target.value;
+        renderEntries();
+      });
+
+      // Add/Edit Form Handlers
+      DOM.btnTypeShare.addEventListener('click', () => setTransactionType('share'));
+      DOM.btnTypePay.addEventListener('click', () => setTransactionType('pay'));
+
+      DOM.inputAmount.addEventListener('input', updateLiveSplitPreview);
+
+      document.querySelectorAll('.preset-chips .chip-btn[data-amt]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const current = parseFloat(DOM.inputAmount.value) || 0;
+          const add = parseFloat(btn.dataset.amt);
+          DOM.inputAmount.value = (current + add).toFixed(2);
+          updateLiveSplitPreview();
+        });
+      });
+
+      document.querySelectorAll('.preset-chips .chip-btn[data-desc]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          DOM.inputDesc.value = btn.dataset.desc;
+        });
+      });
+
+      DOM.btnSelectAllSharers.addEventListener('click', () => renderSharersCheckboxes(AppState.roommates));
+      DOM.btnClearSharers.addEventListener('click', () => renderSharersCheckboxes([]));
+      DOM.btnCancelEdit.addEventListener('click', resetForm);
+
+      DOM.transactionForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const type = DOM.btnTypeShare.classList.contains('active') ? 'share' : 'pay';
+        const amountPaisa = MathEngine.rupeesToPaisa(DOM.inputAmount.value);
+        const date = DOM.inputDate.value;
+        const desc = DOM.inputDesc.value.trim();
+
+        if (amountPaisa <= 0) {
+          alert('Amount must be greater than zero.');
+          return;
+        }
+
+        let newEntry = null;
+
+        if (type === 'share') {
+          const payer = DOM.selectPayer.value;
+          const sharers = getSelectedSharers();
+          if (sharers.length === 0) {
+            alert('Please select at least one roommate to split with.');
+            return;
+          }
+
+          newEntry = {
+            id: AppState.editingEntryId || `entry_${Date.now()}`,
+            type: 'share',
+            amount: amountPaisa,
+            date,
+            desc,
+            payer,
+            sharers,
+            by: AppState.currentUser
+          };
+        } else {
+          const from = DOM.selectPayFrom.value;
+          const to = DOM.selectPayTo.value;
+          if (from === to) {
+            alert('Payer (From) and Receiver (To) cannot be the same person.');
+            return;
+          }
+
+          newEntry = {
+            id: AppState.editingEntryId || `entry_${Date.now()}`,
+            type: 'pay',
+            amount: amountPaisa,
+            date,
+            desc,
+            from,
+            to,
+            by: AppState.currentUser
+          };
+        }
+
+        if (AppState.editingEntryId) {
+          const idx = AppState.entries.findIndex(e => String(e.id) === String(AppState.editingEntryId));
+          if (idx !== -1) AppState.entries[idx] = newEntry;
+          showToast('Updated transaction successfully!');
+        } else {
+          AppState.entries.push(newEntry);
+          showToast('Recorded new transaction!');
+        }
+
+        syncStateToStorageAndCloud();
+        resetForm();
+        renderDashboard();
+        renderEntries();
+        switchTab('dashboard');
+      });
+
+      // Importer Handlers
+      DOM.btnLoadSampleBulk.addEventListener('click', () => {
+        const sampleText = BENCHMARK_ENTRIES.map(e => {
+          const rupees = (e.amount / 100).toFixed(0);
+          if (e.type === 'share') {
+            return `share | ${e.date} | ${e.desc} | ${rupees} | ${e.payer} | ${e.sharers.join(', ')}`;
+          } else {
+            return `pay | ${e.date} | ${e.desc} | ${rupees} | ${e.from} | ${e.to}`;
+          }
+        }).join('\n');
+        DOM.bulkTextarea.value = sampleText;
+        handleParseBulk();
+      });
+
+      DOM.btnParseBulk.addEventListener('click', handleParseBulk);
+      DOM.btnCommitBulk.addEventListener('click', handleCommitBulk);
+
+      DOM.chkBulkMaster.addEventListener('change', (e) => {
+        const chk = e.target.checked;
+        AppState.parsedBulkEntries.forEach(item => item.selected = chk);
+        DOM.bulkPreviewTbody.querySelectorAll('.chk-bulk-row').forEach(c => c.checked = chk);
+      });
+
+      DOM.btnBulkToggleAll.addEventListener('click', () => {
+        const allSelected = AppState.parsedBulkEntries.every(e => e.selected);
+        AppState.parsedBulkEntries.forEach(item => item.selected = !allSelected);
+        DOM.bulkPreviewTbody.querySelectorAll('.chk-bulk-row').forEach(c => c.checked = !allSelected);
+        DOM.chkBulkMaster.checked = !allSelected;
+      });
+
+      // Add Roommate
+      DOM.addRoommateForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = DOM.inputNewRoommate.value.trim();
+        if (!name) return;
+        if (AppState.roommates.some(r => r.toLowerCase() === name.toLowerCase())) {
+          alert(`Flatmate "${name}" already exists.`);
+          return;
+        }
+        AppState.roommates.push(name);
+        syncStateToStorageAndCloud();
+        DOM.inputNewRoommate.value = '';
+        renderRoommates();
+        renderDashboard();
+        showToast(`Added flatmate "${name}"`);
+      });
+
+      // Backup & Restore
+      DOM.btnExportBackup.addEventListener('click', () => {
+        const data = {
+          version: 1,
+          roomId: AppState.roomId,
+          exportedAt: new Date().toISOString(),
+          roommates: AppState.roommates,
+          entries: AppState.entries
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `roomates-sheet-${AppState.roomId}-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Exported JSON backup!');
+      });
+
+      DOM.fileImportBackup.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const data = JSON.parse(evt.target.result);
+            if (Array.isArray(data.roommates) && Array.isArray(data.entries)) {
+              AppState.roommates = data.roommates;
+              AppState.entries = data.entries;
+              if (data.roomId) AppState.roomId = data.roomId;
+              syncStateToStorageAndCloud();
+              renderRoommates();
+              renderDashboard();
+              renderEntries();
+              showToast('Restored backup successfully!');
+            } else {
+              alert('Invalid backup file format.');
+            }
+          } catch (err) {
+            alert('Failed to parse backup JSON file.');
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      DOM.btnLoadBenchmarkPreset.addEventListener('click', () => {
+        if (confirm('Reset current sheet to the official 20-entry benchmark dataset?')) {
+          AppState.roommates = [...BENCHMARK_ROOMMATES];
+          AppState.entries = JSON.parse(JSON.stringify(BENCHMARK_ENTRIES));
+          syncStateToStorageAndCloud();
+          renderRoommates();
+          renderDashboard();
+          renderEntries();
+          showToast('Loaded Official 20-entry Benchmark Dataset!');
+        }
+      });
+
+      DOM.btnClearAllData.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete all entries and reset flatmates?')) {
+          Storage.clear();
+          AppState.roommates = ["Sanaullah", "Ahmed", "Faizan", "Ali"];
+          AppState.entries = [];
+          syncStateToStorageAndCloud();
+          renderRoommates();
+          renderDashboard();
+          renderEntries();
+          showToast('Cleared all data.');
+        }
+      });
+    }
+
+    /* =====================================================================
+       12. INITIALIZATION LIFECYCLE
+       ===================================================================== */
+    function initApp() {
+      initDOMReferences();
+
+      // Parse URL parameters for Room and User Auto-Join (?room=XYZ&user=ABC)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlRoom = urlParams.get('room');
+      const urlUser = urlParams.get('user');
+
+      if (urlRoom) {
+        AppState.roomId = urlRoom.toUpperCase();
+        Storage.saveRoomId(AppState.roomId);
+      } else {
+        AppState.roomId = Storage.getRoomId();
+      }
+
+      // Load Theme
+      applyTheme(Storage.getTheme());
+
+      // Load Roommates
+      AppState.roommates = Storage.getRoommates();
+
+      // Set Active User Profile
+      if (urlUser && urlUser.trim()) {
+        const decodedUser = decodeURIComponent(urlUser.trim());
+        if (!AppState.roommates.includes(decodedUser)) {
+          AppState.roommates.push(decodedUser);
+        }
+        setCurrentUser(decodedUser);
+      } else {
+        setCurrentUser(Storage.getCurrentUser());
+      }
+
+      // Load Entries
+      const storedEntries = Storage.getEntries();
+      if (storedEntries === null) {
+        AppState.entries = JSON.parse(JSON.stringify(BENCHMARK_ENTRIES));
+        Storage.saveEntries(AppState.entries);
+      } else {
+        AppState.entries = storedEntries;
+      }
+
+      DOM.inputDate.value = new Date().toISOString().split('T')[0];
+
+      initEventListeners();
+      initCloudSync();
+      renderRoommates();
+      renderDashboard();
+      renderEntries();
+
+      // Benchmark Auto-Verification
+      const { balances } = MathEngine.calculateBalances(BENCHMARK_ROOMMATES, BENCHMARK_ENTRIES);
+      const isBenchmarkExact = (
+        balances["Faizan"] === 258084 &&
+        balances["Sanaullah"] === 84083 &&
+        balances["Ahmed"] === -299917 &&
+        balances["Ali"] === -42250
+      );
+      DOM.benchmarkHeaderStatus.textContent = isBenchmarkExact ? "100% Verified" : "Check Tests";
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
