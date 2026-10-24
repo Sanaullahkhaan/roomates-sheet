@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Roomates Sheet - Multi-user roommate expense settlement web app with exact paisa precision, user auth, unequal splits, audit trail, and zero penny drift.">
+  <meta name="description" content="Roomates Sheet - Multi-Tenant Roommate Settlement App with Multi-User Authentication, Isolated Rooms, Universal Sorting, and Settle-to-Zero Cycles.">
   <meta name="theme-color" content="#0d9488">
-  <title>Roomates Sheet | Multi-User Expense Settlement & Audit Ledger</title>
-  
+  <title>Roomates Sheet | Multi-Room Settlement & Ledger</title>
+
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
 
   <style>
     /* =====================================================================
-       DESIGN SYSTEM & CSS VARIABLES
+       DESIGN SYSTEM & CSS THEME
        ===================================================================== */
     :root {
       --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -23,23 +23,22 @@
       /* Light Theme */
       --bg-page: #f8fafc;
       --bg-surface: #ffffff;
-      --bg-surface-trans: rgba(255, 255, 255, 0.9);
+      --bg-surface-trans: rgba(255, 255, 255, 0.92);
       --bg-card: #ffffff;
       --bg-card-subtle: #f1f5f9;
       --bg-input: #ffffff;
-      
+
       --border-subtle: #e2e8f0;
       --border-strong: #cbd5e1;
-      
+
       --text-main: #0f172a;
       --text-muted: #64748b;
       --text-faint: #94a3b8;
-      
+
       --teal-primary: #0d9488;
       --teal-light: #ccfbf1;
       --teal-hover: #0f766e;
       --teal-glow: rgba(13, 148, 136, 0.25);
-
       --cyan-accent: #06b6d4;
 
       --emerald-receivable: #059669;
@@ -66,8 +65,8 @@
       --radius-xl: 22px;
       --radius-pill: 9999px;
 
-      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
       --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
       --shadow-float: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
 
@@ -75,11 +74,10 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    /* Dark Theme */
     body[data-theme="dark"] {
       --bg-page: #0b1120;
       --bg-surface: #111827;
-      --bg-surface-trans: rgba(17, 24, 39, 0.92);
+      --bg-surface-trans: rgba(17, 24, 39, 0.94);
       --bg-card: #1e293b;
       --bg-card-subtle: #0f172a;
       --bg-input: #1e293b;
@@ -112,17 +110,13 @@
       --amber-bg: rgba(251, 191, 36, 0.18);
       --amber-text: #fde68a;
 
-      --indigo-accent: #818cf8;
-      --indigo-bg: rgba(99, 102, 241, 0.2);
-      --indigo-text: #c7d2fe;
-
       --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
       --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.7);
       --shadow-float: 0 20px 35px -10px rgba(0, 0, 0, 0.8);
     }
 
-    /* Reset & Base */
+    /* Base Reset */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -138,9 +132,53 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
       line-height: 1.5;
       transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Auth View Wrapper */
+    #view-auth-gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.15), transparent 70%);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 32px 28px;
+      box-shadow: var(--shadow-float);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .auth-logo-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+    }
+
+    .auth-logo {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 26px;
+      font-weight: 800;
+      box-shadow: 0 6px 18px var(--teal-glow);
     }
 
     /* Header */
@@ -152,17 +190,16 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-subtle);
-      transition: all 0.2s ease;
     }
 
     .header-inner {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 12px 16px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .brand {
@@ -170,12 +207,11 @@
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      user-select: none;
     }
 
     .brand-logo {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: var(--radius-md);
       background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
       display: flex;
@@ -183,33 +219,50 @@
       justify-content: center;
       color: white;
       font-weight: 800;
-      font-size: 19px;
+      font-size: 18px;
       box-shadow: 0 4px 12px var(--teal-glow);
       flex-shrink: 0;
     }
 
     .brand-text h1 {
       font-family: var(--font-display);
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text-main);
       line-height: 1.2;
     }
 
     .brand-text span {
-      font-size: 0.72rem;
-      font-weight: 500;
+      font-size: 0.7rem;
+      font-weight: 600;
       color: var(--teal-primary);
       display: block;
-      letter-spacing: 0.02em;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-shrink: 0;
+    }
+
+    /* Room Badge Selector in Header */
+    .btn-room-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--teal-light);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      color: var(--teal-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-room-badge:hover {
+      box-shadow: 0 2px 8px var(--teal-glow);
+      transform: translateY(-1px);
     }
 
     .btn-user-badge {
@@ -225,11 +278,6 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-    }
-
-    .btn-user-badge:hover {
-      border-color: var(--teal-primary);
-      background: var(--bg-card-subtle);
     }
 
     .avatar-sm {
@@ -257,32 +305,13 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .icon-btn:hover {
       background: var(--bg-card-subtle);
       border-color: var(--border-strong);
       transform: translateY(-1px);
-    }
-
-    .badge-audit {
-      background: rgba(244, 63, 94, 0.15);
-      color: var(--rose-debt);
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: var(--radius-pill);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      transition: all 0.2s;
-    }
-
-    .badge-audit:hover {
-      background: rgba(244, 63, 94, 0.25);
     }
 
     /* Container */
@@ -295,9 +324,10 @@
       flex-direction: column;
       gap: 20px;
       flex: 1;
+      padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 24px);
     }
 
-    /* Tabs */
+    /* Tab views */
     .tab-view {
       display: none;
       flex-direction: column;
@@ -314,107 +344,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Navigation Bar */
-    .app-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--nav-height) + var(--safe-bottom));
-      padding-bottom: var(--safe-bottom);
-      background: var(--bg-surface-trans);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border-subtle);
-      z-index: 50;
-      display: flex;
-      justify-content: center;
-    }
-
-    .nav-inner {
-      width: 100%;
-      max-width: 700px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0 6px;
-    }
-
-    .nav-tab {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.7rem;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .nav-tab svg {
-      width: 20px;
-      height: 20px;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .nav-tab.active {
-      color: var(--teal-primary);
-    }
-
-    .nav-tab.active svg {
-      transform: translateY(-2px) scale(1.1);
-    }
-
-    .nav-tab.active::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      width: 26px;
-      height: 3px;
-      border-radius: 0 0 4px 4px;
-      background: var(--teal-primary);
-    }
-
-    .nav-fab-wrap {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .fab-btn {
-      width: 50px;
-      height: 50px;
-      border-radius: var(--radius-pill);
-      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 6px 16px var(--teal-glow);
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      margin-top: -16px;
-    }
-
-    .fab-btn:hover {
-      transform: translateY(-2px) scale(1.08);
-      box-shadow: 0 8px 22px var(--teal-glow);
-    }
-
-    .fab-btn:active {
-      transform: scale(0.94);
-    }
-
     /* Cards */
     .card {
       background: var(--bg-card);
@@ -423,10 +352,6 @@
       padding: 20px;
       box-shadow: var(--shadow-sm);
       transition: all 0.2s ease;
-    }
-
-    .card:hover {
-      border-color: var(--border-strong);
     }
 
     .card-header {
@@ -448,14 +373,112 @@
       gap: 8px;
     }
 
-    .card-title svg {
-      color: var(--teal-primary);
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      font-family: var(--font-main);
+      text-decoration: none;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      color: white;
+      box-shadow: 0 4px 12px var(--teal-glow);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 4px 12px var(--emerald-glow);
+    }
+
+    .btn-rose {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card-subtle);
+      color: var(--text-main);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-subtle);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-card-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .badge-emerald { background: var(--emerald-bg); color: var(--emerald-text); }
+    .badge-rose { background: var(--rose-bg); color: var(--rose-text); }
+    .badge-teal { background: var(--teal-light); color: var(--teal-primary); }
+    .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+
+    /* Cycle Bar */
+    .cycle-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cycle-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 14px;
     }
 
@@ -490,38 +513,7 @@
       color: var(--text-muted);
     }
 
-    /* Cycle & Filter Bar */
-    .cycle-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .cycle-select {
-      background: var(--bg-card-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 6px 10px;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-    }
-
     /* Analytics Bar */
-    .analytics-box {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
     .analytics-bar-wrap {
       width: 100%;
       height: 12px;
@@ -529,6 +521,7 @@
       background: var(--bg-card-subtle);
       overflow: hidden;
       display: flex;
+      margin-bottom: 12px;
     }
 
     .analytics-segment {
@@ -595,25 +588,8 @@
       flex-shrink: 0;
     }
 
-    .avatar-debtor {
-      background: linear-gradient(135deg, #f43f5e, #e11d48);
-    }
-
-    .avatar-creditor {
-      background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .flow-badge {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--teal-primary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .flow-arrow svg {
-      color: var(--text-muted);
-    }
+    .avatar-debtor { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+    .avatar-creditor { background: linear-gradient(135deg, #10b981, #059669); }
 
     .settlement-amount {
       font-family: var(--font-display);
@@ -625,7 +601,7 @@
     /* Balances Grid */
     .balances-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 14px;
     }
 
@@ -637,27 +613,11 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      position: relative;
-      overflow: hidden;
     }
 
-    .balance-card.receivable {
-      border-left: 4px solid var(--emerald-receivable);
-    }
-
-    .balance-card.debt {
-      border-left: 4px solid var(--rose-debt);
-    }
-
-    .balance-card.settled {
-      border-left: 4px solid var(--text-faint);
-    }
-
-    .balance-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .balance-card.receivable { border-left: 4px solid var(--emerald-receivable); }
+    .balance-card.debt { border-left: 4px solid var(--rose-debt); }
+    .balance-card.settled { border-left: 4px solid var(--text-faint); }
 
     .balance-val {
       font-family: var(--font-display);
@@ -679,86 +639,62 @@
       padding-top: 8px;
     }
 
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 14px;
+    /* Ledger & Deep Sorting/Filtering Bar */
+    .filter-panel {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      font-family: var(--font-main);
-      text-decoration: none;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
-      color: white;
-      box-shadow: 0 4px 12px var(--teal-glow);
-    }
-
-    .btn-primary:hover {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
-    }
-
-    .btn-emerald {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      box-shadow: 0 4px 12px var(--emerald-glow);
-    }
-
-    .btn-secondary {
-      background: var(--bg-card-subtle);
-      color: var(--text-main);
-      border-color: var(--border-subtle);
-    }
-
-    .btn-secondary:hover {
-      background: var(--border-subtle);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-muted);
-    }
-
-    .btn-ghost:hover {
-      background: var(--bg-card-subtle);
-      color: var(--text-main);
-    }
-
-    .btn-sm {
-      padding: 5px 10px;
-      font-size: 0.78rem;
-    }
-
-    .badge {
-      display: inline-flex;
+    .filter-row {
+      display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-      font-size: 0.72rem;
-      font-weight: 700;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .badge-emerald { background: var(--emerald-bg); color: var(--emerald-text); }
-    .badge-rose { background: var(--rose-bg); color: var(--rose-text); }
-    .badge-teal { background: var(--teal-light); color: var(--teal-primary); }
-    .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
-    .badge-indigo { background: var(--indigo-bg); color: var(--indigo-text); }
+    .chip-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-    /* Entry Card in Ledger */
+    .chip-btn:hover {
+      border-color: var(--teal-primary);
+      color: var(--teal-primary);
+    }
+
+    .chip-btn.active {
+      background: var(--teal-light);
+      border-color: var(--teal-primary);
+      color: var(--teal-primary);
+    }
+
+    .select-dropdown {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Entry Card */
     .entry-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
@@ -894,6 +830,13 @@
       box-shadow: 0 0 0 3px var(--teal-glow);
     }
 
+    .amount-input {
+      padding-left: 50px !important;
+      font-family: var(--font-display);
+      font-size: 1.35rem !important;
+      font-weight: 800;
+    }
+
     .input-amount-wrap {
       position: relative;
       display: flex;
@@ -909,13 +852,6 @@
       font-size: 1.15rem;
     }
 
-    .amount-input {
-      padding-left: 50px !important;
-      font-family: var(--font-display);
-      font-size: 1.35rem !important;
-      font-weight: 800;
-    }
-
     .preset-chips {
       display: flex;
       flex-wrap: wrap;
@@ -923,30 +859,6 @@
       margin-top: 6px;
     }
 
-    .chip-btn {
-      background: var(--bg-card-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-pill);
-      padding: 3px 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .chip-btn:hover {
-      border-color: var(--teal-primary);
-      color: var(--teal-primary);
-    }
-
-    .chip-btn.active {
-      background: var(--teal-light);
-      border-color: var(--teal-primary);
-      color: var(--teal-primary);
-    }
-
-    /* Split Option Radios */
     .split-mode-tabs {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -998,6 +910,103 @@
       text-align: right;
     }
 
+    /* Bottom Navigation */
+    .app-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--nav-height) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: var(--bg-surface-trans);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 700px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+    }
+
+    .nav-tab {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-tab svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .nav-tab.active {
+      color: var(--teal-primary);
+    }
+
+    .nav-tab.active svg {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 26px;
+      height: 3px;
+      border-radius: 0 0 4px 4px;
+      background: var(--teal-primary);
+    }
+
+    .nav-fab-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .fab-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 16px var(--teal-glow);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-top: -16px;
+    }
+
+    .fab-btn:hover {
+      transform: translateY(-2px) scale(1.08);
+      box-shadow: 0 8px 22px var(--teal-glow);
+    }
+
     /* Modals */
     .modal-backdrop {
       position: fixed;
@@ -1015,16 +1024,14 @@
       animation: fadeIn 0.15s ease-out;
     }
 
-    .modal-backdrop.open {
-      display: flex;
-    }
+    .modal-backdrop.open { display: flex; }
 
     .modal-window {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: var(--shadow-float);
@@ -1063,6 +1070,33 @@
       background: var(--bg-card-subtle);
     }
 
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-card-subtle);
+      padding: 10px 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
     /* Toast */
     #toast-container {
       position: fixed;
@@ -1094,38 +1128,6 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Table for Audit & Importer */
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-      text-align: left;
-    }
-
-    th {
-      background: var(--bg-card-subtle);
-      padding: 10px 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    /* Empty state */
     .empty-state {
       padding: 30px 20px;
       text-align: center;
@@ -1146,525 +1148,559 @@
       justify-content: center;
       color: var(--teal-primary);
       margin-bottom: 4px;
-    }
-
-    /* Responsive */
-    @media (max-width: 640px) {
-      .split-mode-tabs {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .app-header .brand-text span {
-        display: none;
-      }
+      font-size: 20px;
     }
   </style>
 </head>
 <body data-theme="system">
 
-  <!-- Header -->
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand" id="btn-brand-home">
-        <div class="brand-logo">₨</div>
-        <div class="brand-text">
-          <h1>Roomates Sheet</h1>
-          <span>Multi-User Verified Settlement</span>
+  <!-- =====================================================================
+       1. STRICT AUTH GATE SCREEN (Shown if user is NOT logged in)
+       ===================================================================== -->
+  <div id="view-auth-gate">
+    <div class="auth-card">
+      <div class="auth-logo-box">
+        <div class="auth-logo">₨</div>
+        <h2 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 700;">Roomates Sheet</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Create an account or sign in to access your flat's expense settlements.
+        </p>
+      </div>
+
+      <!-- Auth Mode Tabs: Sign In vs Sign Up -->
+      <div style="display: flex; gap: 8px; background: var(--bg-card-subtle); padding: 4px; border-radius: var(--radius-md);">
+        <button class="btn btn-primary" id="btn-gate-tab-login" style="flex: 1; padding: 7px;">Sign In</button>
+        <button class="btn btn-ghost" id="btn-gate-tab-register" style="flex: 1; padding: 7px;">Create Account</button>
+      </div>
+
+      <form id="form-gate-auth" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group" id="gate-group-name" style="display: none;">
+          <label class="form-label" for="gate-input-name">Full Name</label>
+          <input type="text" id="gate-input-name" class="form-input" placeholder="e.g. Sanaullah Khan">
         </div>
-      </div>
 
-      <div class="header-actions">
-        <!-- Deletion History Audit Trigger -->
-        <button class="badge-audit" id="btn-open-audit" title="View Deletion & Audit History">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-          <span id="audit-badge-count">Audit (0)</span>
-        </button>
+        <div class="form-group">
+          <label class="form-label" for="gate-input-user">Username or Email</label>
+          <input type="text" id="gate-input-user" class="form-input" placeholder="e.g. sanaullah or sana@mail.com" required>
+        </div>
 
-        <!-- Current User Profile / Login -->
-        <button class="btn-user-badge" id="btn-user-auth">
-          <div class="avatar-sm" id="header-user-avatar">?</div>
-          <span id="header-user-name">Login</span>
-        </button>
+        <div class="form-group">
+          <label class="form-label" for="gate-input-pass">Password</label>
+          <input type="password" id="gate-input-pass" class="form-input" placeholder="••••••••" required>
+        </div>
 
-        <!-- Theme Toggle -->
-        <button class="icon-btn" id="btn-toggle-theme" title="Toggle Dark/Light Mode">
-          <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
+        <button type="submit" class="btn btn-primary" id="btn-gate-submit" style="padding: 12px; font-size: 0.95rem; margin-top: 4px;">
+          Sign In
         </button>
-      </div>
+      </form>
     </div>
-  </header>
+  </div>
 
-  <!-- Main Container -->
-  <main class="app-container">
+  <!-- =====================================================================
+       2. MAIN APP INTERFACE (Shown only after login)
+       ===================================================================== -->
+  <div id="view-app-main" style="display: none; flex-direction: column; min-height: 100vh;">
 
-    <!-- TAB 1: DASHBOARD -->
-    <div class="tab-view active" id="view-dashboard">
-      <!-- Billing Cycle & Actions Bar -->
-      <div class="cycle-bar">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Cycle:</span>
-          <select id="cycle-select" class="cycle-select">
-            <option value="all">All Time (Benchmark Full Cycle)</option>
-          </select>
+    <!-- Top App Header -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand" id="btn-brand-home">
+          <div class="brand-logo">₨</div>
+          <div class="brand-text">
+            <h1>Roomates Sheet</h1>
+            <span id="header-room-subtitle">Loading room...</span>
+          </div>
         </div>
 
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" id="btn-export-csv" title="Export Ledger to Excel/CSV">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export CSV
+        <div class="header-actions">
+          <!-- Room Switcher Badge -->
+          <button class="btn-room-badge" id="btn-open-room-switcher" title="Switch or Create Room">
+            🏠 <span id="header-room-badge-text">Select Room</span> ▼
           </button>
-          <button class="btn btn-primary btn-sm" id="btn-dash-whatsapp">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
-            WhatsApp
+
+          <!-- Deletion History Audit Badge -->
+          <button class="btn btn-secondary btn-sm" id="btn-open-audit" title="View Deletion & Audit History">
+            🛡️ <span id="audit-badge-count">Audit (0)</span>
           </button>
+
+          <!-- User Profile & Sign Out Dropdown -->
+          <button class="btn-user-badge" id="btn-open-user-menu">
+            <div class="avatar-sm" id="header-user-avatar">?</div>
+            <span id="header-user-name">User</span>
+          </button>
+
+          <!-- Theme Toggle -->
+          <button class="icon-btn" id="btn-toggle-theme" title="Toggle Theme">🌓</button>
         </div>
       </div>
+    </header>
 
-      <!-- Stats Grid -->
-      <section class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Shared Spend</div>
-          <div class="stat-val" id="stat-total-spend">Rs. 0.00</div>
-          <div class="stat-sub" id="stat-shared-count">0 shared expenses</div>
-        </div>
+    <!-- App Content Container -->
+    <main class="app-container">
 
-        <div class="stat-card">
-          <div class="stat-label">Direct Settlements</div>
-          <div class="stat-val" id="stat-direct-transfers">Rs. 0.00</div>
-          <div class="stat-sub" id="stat-pay-count">0 cash payments</div>
-        </div>
+      <!-- TAB 1: DASHBOARD -->
+      <div class="tab-view active" id="view-dashboard">
 
-        <div class="stat-card">
-          <div class="stat-label">Settlement Transfers</div>
-          <div class="stat-val" id="stat-transfers-count" style="color: var(--teal-primary);">0</div>
-          <div class="stat-sub">Optimal greedy paths</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-label">Roommates Count</div>
-          <div class="stat-val" id="stat-roommates-count">4</div>
-          <div class="stat-sub" id="stat-room-id">Room: FLAT-402</div>
-        </div>
-      </section>
-
-      <!-- Category Spending Analytics Bar -->
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Spending Breakdown by Category
+        <!-- Active Cycle & Settle-to-Zero Action Bar -->
+        <div class="cycle-bar">
+          <div class="cycle-info">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">ACTIVE CYCLE:</span>
+            <strong id="active-cycle-name" style="font-family: var(--font-display); color: var(--teal-primary);">Current Cycle</strong>
           </div>
-          <span style="font-size: 0.78rem; color: var(--text-muted);" id="analytics-total-label">Total: Rs. 0.00</span>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Settle-to-Zero & Start Fresh Cycle Button -->
+            <button class="btn btn-rose btn-sm" id="btn-close-cycle" title="Archive current period and reset active balances to zero">
+              🔄 Settle All & Start Fresh
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-open-past-cycles">
+              📚 Past Cycles Archive
+            </button>
+            <button class="btn btn-emerald btn-sm" id="btn-dash-whatsapp">
+              WhatsApp
+            </button>
+          </div>
         </div>
 
-        <div class="analytics-box">
+        <!-- Dashboard Stats Grid -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Shared Spend</div>
+            <div class="stat-val" id="stat-total-spend">Rs. 0.00</div>
+            <div class="stat-sub" id="stat-shared-count">0 shared expenses</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Direct Settlements</div>
+            <div class="stat-val" id="stat-direct-transfers">Rs. 0.00</div>
+            <div class="stat-sub" id="stat-pay-count">0 direct payments</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Settlement Transfers</div>
+            <div class="stat-val" id="stat-transfers-count" style="color: var(--teal-primary);">0</div>
+            <div class="stat-sub">Optimal greedy paths</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Roommates</div>
+            <div class="stat-val" id="stat-roommates-count">0</div>
+            <div class="stat-sub" id="stat-room-code-tag">Code: FLAT-402</div>
+          </div>
+        </section>
+
+        <!-- Category Spending Analytics Bar -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              📊 Spending Analytics by Category
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);" id="analytics-total-label">Total: Rs. 0.00</span>
+          </div>
+
           <div class="analytics-bar-wrap" id="analytics-bar"></div>
           <div class="analytics-legend" id="analytics-legend"></div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Optimal Cash Transfers Card -->
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-            Optimal Settlement Transfers
-          </div>
-          <span class="badge badge-teal" id="settlements-badge">3 Transfers Needed</span>
-        </div>
-
-        <div id="settlements-list"></div>
-      </section>
-
-      <!-- Net Balances Grid -->
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Flatmate Balances & Ledgers
-          </div>
-          <span class="badge badge-emerald" id="benchmark-status-badge">100% Zero-Sum Verified</span>
-        </div>
-
-        <div class="balances-grid" id="balances-grid"></div>
-      </section>
-    </div>
-
-    <!-- TAB 2: LEDGER (TRANSACTIONS) -->
-    <div class="tab-view" id="view-entries">
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            Transaction Ledger
-          </div>
-          <span class="badge badge-teal" id="entries-count-badge">20 Entries</span>
-        </div>
-
-        <!-- Search & Filter Controls -->
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-          <input type="text" id="filter-search" class="form-input" placeholder="🔍 Search description, person, amount...">
-
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between;">
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-              <button class="chip-btn active" data-type="all">All Types</button>
-              <button class="chip-btn" data-type="share">Shared</button>
-              <button class="chip-btn" data-type="pay">Direct Pay</button>
+        <!-- Optimal Cash Transfers Card -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              🤝 Optimal Cash Settlements
             </div>
-
-            <div style="display: flex; gap: 8px;">
-              <select id="filter-category" class="cycle-select">
-                <option value="all">All Categories</option>
-                <option value="Groceries">🛒 Groceries</option>
-                <option value="Electricity">⚡ Electricity/Bills</option>
-                <option value="Rent">🏠 Rent</option>
-                <option value="Food">🍲 Food / Dining</option>
-                <option value="Internet">📶 Internet</option>
-                <option value="Water">💧 Water / Utilities</option>
-                <option value="Settlement">🤝 Settlement</option>
-                <option value="Other">📦 Other</option>
-              </select>
-
-              <select id="filter-roommate" class="cycle-select">
-                <option value="all">All Roommates</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Transactions Container -->
-        <div style="display: flex; flex-direction: column; gap: 8px;" id="entries-list-container"></div>
-      </section>
-    </div>
-
-    <!-- TAB 3: ADD TRANSACTION (WITH CUSTOM UNEQUAL SPLIT) -->
-    <div class="tab-view" id="view-add">
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title" id="form-heading">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Add New Transaction
-          </div>
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-edit" style="display: none;">Cancel Edit</button>
-        </div>
-
-        <!-- Toggle Type: Shared vs Direct Pay -->
-        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <button type="button" class="btn btn-primary" id="btn-type-share" style="flex: 1;">Shared Expense</button>
-          <button type="button" class="btn btn-secondary" id="btn-type-pay" style="flex: 1;">Direct Payment</button>
-        </div>
-
-        <form id="transaction-form">
-          <input type="hidden" id="entry-edit-id" value="">
-
-          <!-- Amount -->
-          <div class="form-group">
-            <label class="form-label">
-              Amount
-              <span class="hint" id="paisa-preview" style="font-size: 0.75rem; color: var(--teal-primary);">0 paisa</span>
-            </label>
-            <div class="input-amount-wrap">
-              <span class="amount-currency">Rs.</span>
-              <input type="number" step="any" min="0.01" id="input-amount" class="form-input amount-input" placeholder="0.00" required>
-            </div>
-            <div class="preset-chips">
-              <button type="button" class="chip-btn" data-amt="200">+200</button>
-              <button type="button" class="chip-btn" data-amt="500">+500</button>
-              <button type="button" class="chip-btn" data-amt="1000">+1,000</button>
-              <button type="button" class="chip-btn" data-amt="2000">+2,000</button>
-              <button type="button" class="chip-btn" data-amt="5000">+5,000</button>
-            </div>
+            <span class="badge badge-teal" id="settlements-badge">0 Transfers</span>
           </div>
 
-          <!-- Date & Category -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group">
-              <label class="form-label" for="input-date">Date</label>
-              <input type="date" id="input-date" class="form-input" required>
-            </div>
+          <div id="settlements-list"></div>
+        </section>
 
-            <div class="form-group">
-              <label class="form-label" for="select-category">Category</label>
-              <select id="select-category" class="form-select">
-                <option value="Groceries">🛒 Groceries</option>
-                <option value="Electricity">⚡ Electricity</option>
-                <option value="Rent">🏠 Rent</option>
-                <option value="Food">🍲 Food / Dining</option>
-                <option value="Internet">📶 Internet</option>
-                <option value="Water">💧 Water</option>
-                <option value="Settlement">🤝 Settlement</option>
-                <option value="Other">📦 Other</option>
+        <!-- Flatmate Balances & Ledgers Grid -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              👥 Flatmate Balances & Ledgers
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Sort:</span>
+              <select id="sort-balances" class="select-dropdown">
+                <option value="net-desc">Net Balance (Highest First)</option>
+                <option value="net-asc">Net Balance (Lowest Debt First)</option>
+                <option value="name-asc">Name (A ➔ Z)</option>
+                <option value="paid-desc">Most Money Paid for Flat</option>
               </select>
             </div>
           </div>
 
-          <!-- Description -->
-          <div class="form-group">
-            <label class="form-label" for="input-desc">Description</label>
-            <input type="text" id="input-desc" class="form-input" placeholder="e.g. Grocery items, Dinner, Electricity bill" required>
-          </div>
-
-          <!-- Quick Description Presets -->
-          <div class="preset-chips" style="margin-top: -6px; margin-bottom: 16px;">
-            <button type="button" class="chip-btn" data-desc="Groceries">🛒 Groceries</button>
-            <button type="button" class="chip-btn" data-desc="Dinner / Food">🍲 Dinner</button>
-            <button type="button" class="chip-btn" data-desc="Electricity Bill">⚡ Electricity</button>
-            <button type="button" class="chip-btn" data-desc="Internet / Wi-Fi">📶 Wi-Fi</button>
-            <button type="button" class="chip-btn" data-desc="Water Bottles">💧 Water</button>
-          </div>
-
-          <!-- SHARED FIELDS -->
-          <div id="fields-share">
-            <div class="form-group">
-              <label class="form-label" for="select-payer">Who Paid?</label>
-              <select id="select-payer" class="form-select"></select>
-            </div>
-
-            <!-- Split Method Tabs -->
-            <div class="form-group">
-              <label class="form-label">Split Method</label>
-              <div class="split-mode-tabs">
-                <button type="button" class="split-tab active" data-split="equal">Equally (=)</button>
-                <button type="button" class="split-tab" data-split="exact">Exact (Rs.)</button>
-                <button type="button" class="split-tab" data-split="shares">Shares (1x, 2x)</button>
-                <button type="button" class="split-tab" data-split="percent">Percent (%)</button>
-              </div>
-            </div>
-
-            <!-- Sharers Checklist / Custom Inputs -->
-            <div class="form-group">
-              <div class="form-label">
-                <span>Roommates Split</span>
-                <div style="display: flex; gap: 8px;">
-                  <button type="button" class="btn btn-ghost btn-sm" id="btn-select-all-sharers">Select All</button>
-                  <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-sharers">Clear</button>
-                </div>
-              </div>
-              <div id="sharers-inputs-container"></div>
-            </div>
-
-            <!-- Live Split Summary Box -->
-            <div class="card" style="background: var(--bg-card-subtle); padding: 12px; margin-bottom: 16px;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
-                <span>Split Verification</span>
-                <span id="preview-sharers-status" style="color: var(--emerald-receivable);">Ready</span>
-              </div>
-              <div id="preview-shares-detail" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;"></div>
-            </div>
-          </div>
-
-          <!-- DIRECT PAYMENT FIELDS -->
-          <div id="fields-pay" style="display: none;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label" for="select-pay-from">From (Payer)</label>
-                <select id="select-pay-from" class="form-select"></select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="select-pay-to">To (Receiver)</label>
-                <select id="select-pay-to" class="form-select"></select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <button type="submit" class="btn btn-primary" id="btn-submit-entry" style="width: 100%; padding: 12px; font-size: 1rem;">
-            Record Transaction
-          </button>
-        </form>
-      </section>
-    </div>
-
-    <!-- TAB 4: BULK IMPORTER -->
-    <div class="tab-view" id="view-import">
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Bulk Text Line Importer
-          </div>
-          <button class="btn btn-secondary btn-sm" id="btn-load-sample-bulk">Load Official 20-Entry Sample</button>
-        </div>
-
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
-          Paste expenses in pipe format: <code>share | YYYY-MM-DD | Description | Amount | Payer | Person1, Person2</code>
-        </p>
-
-        <textarea id="bulk-textarea" class="form-textarea" rows="7" placeholder="share | 2026-10-22 | Groceries | 1410 | Sanaullah | Sanaullah, Ahmed, Faizan&#10;pay | 2026-10-22 | Ahmed to Sanaullah | 3000 | Ahmed | Sanaullah"></textarea>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
-            <input type="checkbox" id="chk-auto-add-people" checked>
-            <span>Auto-add newly discovered roommates</span>
-          </label>
-          <button class="btn btn-primary" id="btn-parse-bulk">Parse Entries</button>
-        </div>
-
-        <div id="bulk-preview-section" style="display: none; margin-top: 18px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 700; font-size: 0.95rem;">Ready to Commit (<span id="parsed-valid-count">0</span>)</span>
-            <button class="btn btn-emerald btn-sm" id="btn-commit-bulk">Commit to Ledger</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Amount</th>
-                  <th>Parties</th>
-                </tr>
-              </thead>
-              <tbody id="bulk-preview-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- TAB 5: ROOMMATES & SETTINGS -->
-    <div class="tab-view" id="view-roommates">
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Manage Flatmates
-          </div>
-          <span class="badge badge-teal" id="roommates-active-badge">4 Flatmates</span>
-        </div>
-
-        <form id="add-roommate-form" style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <input type="text" id="input-new-roommate" class="form-input" placeholder="New flatmate name (e.g. Usman)" required>
-          <button type="submit" class="btn btn-primary" style="flex-shrink: 0;">Add Flatmate</button>
-        </form>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="roommates-chips-container"></div>
-      </section>
-
-      <!-- Data Backup & CSV Export -->
-      <section class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Data Management & Spreadsheet Export
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-          <button class="btn btn-primary" id="btn-settings-export-csv">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export to Excel (CSV)
-          </button>
-
-          <button class="btn btn-secondary" id="btn-export-backup">
-            Export JSON Backup
-          </button>
-
-          <label class="btn btn-secondary" style="margin: 0; cursor: pointer;">
-            Import Backup
-            <input type="file" id="file-import-backup" accept=".json" style="display: none;">
-          </label>
-
-          <button class="btn btn-secondary" id="btn-load-benchmark-preset">
-            Reset to Official Benchmark
-          </button>
-        </div>
-      </section>
-    </div>
-
-  </main>
-
-  <!-- Bottom Navigation -->
-  <nav class="app-nav">
-    <div class="nav-inner">
-      <button class="nav-tab active" data-tab="dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-        <span>Dashboard</span>
-      </button>
-
-      <button class="nav-tab" data-tab="entries">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        <span>Ledger</span>
-      </button>
-
-      <div class="nav-fab-wrap">
-        <button class="fab-btn" id="fab-add-trans" title="Add Transaction">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
+          <div class="balances-grid" id="balances-grid"></div>
+        </section>
       </div>
 
-      <button class="nav-tab" data-tab="import">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        <span>Import</span>
-      </button>
+      <!-- TAB 2: LEDGER (WITH DEEP SORTING & FILTERING EVERYWHERE) -->
+      <div class="tab-view" id="view-entries">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              📋 Transaction Ledger
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-export-csv">
+                📥 Export CSV
+              </button>
+              <span class="badge badge-teal" id="entries-count-badge">0 Entries</span>
+            </div>
+          </div>
 
-      <button class="nav-tab" data-tab="roommates">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Flatmates</span>
-      </button>
-    </div>
-  </nav>
+          <!-- Deep Universal Filter & Sort Panel -->
+          <div class="filter-panel">
+            <!-- Row 1: Search & Sorting -->
+            <div class="filter-row">
+              <input type="text" id="filter-search" class="form-input" style="max-width: 320px;" placeholder="🔍 Search description, person, amount...">
 
-  <!-- MODAL 1: AUTHENTICATION (SIGN UP & LOGIN) -->
-  <div class="modal-backdrop" id="modal-auth">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">SORT BY:</span>
+                <select id="sort-entries" class="select-dropdown">
+                  <option value="date-desc">Date (Newest First)</option>
+                  <option value="date-asc">Date (Oldest First)</option>
+                  <option value="amt-desc">Amount (Highest First)</option>
+                  <option value="amt-asc">Amount (Lowest First)</option>
+                  <option value="desc-asc">Description (A ➔ Z)</option>
+                  <option value="payer-asc">Payer / Person (A ➔ Z)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Row 2: Type Filters -->
+            <div class="filter-row">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">TYPE:</span>
+                <button class="chip-btn active" data-filter-type="all">All</button>
+                <button class="chip-btn" data-filter-type="share">Shared Expenses</button>
+                <button class="chip-btn" data-filter-type="pay">Direct Cash</button>
+              </div>
+
+              <!-- Select All / Clear All Categories -->
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">CATEGORY:</span>
+                <select id="filter-category" class="select-dropdown">
+                  <option value="all">All Categories</option>
+                  <option value="Groceries">🛒 Groceries</option>
+                  <option value="Electricity">⚡ Electricity/Gas</option>
+                  <option value="Rent">🏠 Rent</option>
+                  <option value="Food">🍲 Food / Dining</option>
+                  <option value="Internet">📶 Internet</option>
+                  <option value="Water">💧 Water / Utilities</option>
+                  <option value="Settlement">🤝 Settlement</option>
+                  <option value="Other">📦 Other</option>
+                </select>
+
+                <select id="filter-roommate" class="select-dropdown">
+                  <option value="all">All Roommates</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transactions Container -->
+          <div style="display: flex; flex-direction: column; gap: 8px;" id="entries-list-container"></div>
+        </section>
+      </div>
+
+      <!-- TAB 3: ADD TRANSACTION (WITH CUSTOM UNEQUAL SPLIT) -->
+      <div class="tab-view" id="view-add">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title" id="form-heading">
+              ➕ Add New Transaction
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-edit" style="display: none;">Cancel Edit</button>
+          </div>
+
+          <!-- Type Selector: Shared Expense vs Direct Cash -->
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button type="button" class="btn btn-primary" id="btn-type-share" style="flex: 1;">Shared Expense</button>
+            <button type="button" class="btn btn-secondary" id="btn-type-pay" style="flex: 1;">Direct Payment</button>
+          </div>
+
+          <form id="transaction-form">
+            <input type="hidden" id="entry-edit-id" value="">
+
+            <!-- Amount Input -->
+            <div class="form-group">
+              <label class="form-label">
+                Amount
+                <span class="hint" id="paisa-preview" style="font-size: 0.75rem; color: var(--teal-primary);">0 paisa</span>
+              </label>
+              <div class="input-amount-wrap">
+                <span class="amount-currency">Rs.</span>
+                <input type="number" step="any" min="0.01" id="input-amount" class="form-input amount-input" placeholder="0.00" required>
+              </div>
+              <div class="preset-chips">
+                <button type="button" class="chip-btn" data-amt="200">+200</button>
+                <button type="button" class="chip-btn" data-amt="500">+500</button>
+                <button type="button" class="chip-btn" data-amt="1000">+1,000</button>
+                <button type="button" class="chip-btn" data-amt="2000">+2,000</button>
+                <button type="button" class="chip-btn" data-amt="5000">+5,000</button>
+              </div>
+            </div>
+
+            <!-- Date & Category -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="input-date">Date</label>
+                <input type="date" id="input-date" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="select-category">Category</label>
+                <select id="select-category" class="form-select">
+                  <option value="Groceries">🛒 Groceries</option>
+                  <option value="Electricity">⚡ Electricity/Gas</option>
+                  <option value="Rent">🏠 Rent</option>
+                  <option value="Food">🍲 Food / Dining</option>
+                  <option value="Internet">📶 Internet</option>
+                  <option value="Water">💧 Water / Utilities</option>
+                  <option value="Settlement">🤝 Settlement</option>
+                  <option value="Other">📦 Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label" for="input-desc">Description</label>
+              <input type="text" id="input-desc" class="form-input" placeholder="e.g. Grocery items, Dinner, Electricity bill" required>
+            </div>
+
+            <!-- Quick Description Presets -->
+            <div class="preset-chips" style="margin-top: -6px; margin-bottom: 16px;">
+              <button type="button" class="chip-btn" data-desc="Groceries">🛒 Groceries</button>
+              <button type="button" class="chip-btn" data-desc="Dinner / Food">🍲 Dinner</button>
+              <button type="button" class="chip-btn" data-desc="Electricity Bill">⚡ Electricity</button>
+              <button type="button" class="chip-btn" data-desc="Internet Bill">📶 Wi-Fi</button>
+              <button type="button" class="chip-btn" data-desc="Water Bottles">💧 Water</button>
+            </div>
+
+            <!-- SHARED FIELDS -->
+            <div id="fields-share">
+              <div class="form-group">
+                <label class="form-label" for="select-payer">Who Paid?</label>
+                <select id="select-payer" class="form-select"></select>
+              </div>
+
+              <!-- Split Mode Selector -->
+              <div class="form-group">
+                <label class="form-label">Split Method</label>
+                <div class="split-mode-tabs">
+                  <button type="button" class="split-tab active" data-split="equal">Equally (=)</button>
+                  <button type="button" class="split-tab" data-split="exact">Exact (Rs.)</button>
+                  <button type="button" class="split-tab" data-split="shares">Shares (1x, 2x)</button>
+                  <button type="button" class="split-tab" data-split="percent">Percent (%)</button>
+                </div>
+              </div>
+
+              <!-- Sharers List with Inputs -->
+              <div class="form-group">
+                <div class="form-label">
+                  <span>Split With Flatmates</span>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-ghost btn-sm" id="btn-select-all-sharers">Select All</button>
+                    <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-sharers">Clear</button>
+                  </div>
+                </div>
+                <div id="sharers-inputs-container"></div>
+              </div>
+
+              <!-- Live Split Verification Box -->
+              <div class="card" style="background: var(--bg-card-subtle); padding: 12px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
+                  <span>Exact Split Preview</span>
+                  <span id="preview-split-status" style="color: var(--emerald-receivable);">Ready</span>
+                </div>
+                <div id="preview-split-detail" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;"></div>
+              </div>
+            </div>
+
+            <!-- DIRECT PAYMENT FIELDS -->
+            <div id="fields-pay" style="display: none;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                  <label class="form-label" for="select-pay-from">From (Payer)</label>
+                  <select id="select-pay-from" class="form-select"></select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="select-pay-to">To (Receiver)</label>
+                  <select id="select-pay-to" class="form-select"></select>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn-submit-entry" style="width: 100%; padding: 12px; font-size: 1rem;">
+              Record Transaction
+            </button>
+          </form>
+        </section>
+      </div>
+
+      <!-- TAB 4: ROOM & FLATMATES SETTINGS -->
+      <div class="tab-view" id="view-roommates">
+        <!-- Room Details & Invite Link -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              🏠 Room Information & Invite Link
+            </div>
+            <span class="badge badge-teal" id="room-code-display">FLAT-402</span>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            Flatmates can join your room directly using this link or room code after signing up:
+          </p>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+            <input type="text" id="input-invite-link" class="form-input" style="flex: 1; min-width: 240px;" readonly>
+            <button class="btn btn-secondary" id="btn-copy-invite-link">Copy Link</button>
+            <button class="btn btn-emerald" id="btn-share-invite-whatsapp">WhatsApp Invite</button>
+          </div>
+        </section>
+
+        <!-- Roommates List -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              👥 Flatmate Members
+            </div>
+            <span class="badge badge-teal" id="roommates-active-badge">0 Flatmates</span>
+          </div>
+
+          <form id="add-roommate-form" style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <input type="text" id="input-new-roommate" class="form-input" placeholder="Add flatmate by name (e.g. Usman)" required>
+            <button type="submit" class="btn btn-primary" style="flex-shrink: 0;">Add to Room</button>
+          </form>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="roommates-chips-container"></div>
+        </section>
+
+        <!-- Data & CSV Export -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              📥 Excel CSV & Data Backup
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button class="btn btn-primary" id="btn-settings-export-csv">
+              Export to Excel (CSV)
+            </button>
+            <button class="btn btn-secondary" id="btn-export-backup">
+              Export JSON Backup
+            </button>
+            <label class="btn btn-secondary" style="margin: 0; cursor: pointer;">
+              Import Backup
+              <input type="file" id="file-import-backup" accept=".json" style="display: none;">
+            </label>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="app-nav">
+      <div class="nav-inner">
+        <button class="nav-tab active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-tab" data-tab="entries">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <span>Ledger</span>
+        </button>
+
+        <div class="nav-fab-wrap">
+          <button class="fab-btn" id="fab-add-trans" title="Add Transaction">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+
+        <button class="nav-tab" data-tab="roommates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Room Settings</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- =====================================================================
+       3. MODALS
+       ===================================================================== -->
+
+  <!-- MODAL: ROOM SWITCHER / CREATE ROOM / JOIN ROOM -->
+  <div class="modal-backdrop" id="modal-room-manager">
     <div class="modal-window">
       <div class="modal-header">
-        <h3 class="modal-title" id="auth-modal-title">Sign In to Your Account</h3>
+        <h3 class="modal-title">My Rooms & Flats</h3>
         <button class="icon-btn btn-close-modal">✕</button>
       </div>
       <div class="modal-body">
-        <!-- Auth Tabs: Login vs Register -->
-        <div style="display: flex; gap: 8px; background: var(--bg-card-subtle); padding: 4px; border-radius: var(--radius-md);">
-          <button class="btn btn-primary" id="btn-auth-tab-login" style="flex: 1; padding: 6px;">Sign In</button>
-          <button class="btn btn-ghost" id="btn-auth-tab-register" style="flex: 1; padding: 6px;">Register New</button>
+        <!-- List of User's Current Rooms -->
+        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Your Rooms</span>
+        <div id="user-rooms-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;"></div>
+
+        <!-- Join Room Form -->
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 10px;">
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Join Room by Code</h4>
+          <form id="form-join-room" style="display: flex; gap: 8px;">
+            <input type="text" id="input-join-code" class="form-input" placeholder="e.g. FLAT-402" style="text-transform: uppercase;" required>
+            <button type="submit" class="btn btn-secondary" style="flex-shrink: 0;">Join Room</button>
+          </form>
         </div>
 
-        <!-- Form -->
-        <form id="form-auth" style="display: flex; flex-direction: column; gap: 12px;">
-          <div class="form-group" id="group-auth-name" style="display: none;">
-            <label class="form-label" for="auth-input-name">Full Name</label>
-            <input type="text" id="auth-input-name" class="form-input" placeholder="e.g. Sanaullah Khan">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="auth-input-user">Username or Email</label>
-            <input type="text" id="auth-input-user" class="form-input" placeholder="e.g. sanaullah or sana@mail.com" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="auth-input-pass">Password</label>
-            <input type="password" id="auth-input-pass" class="form-input" placeholder="••••••••" required>
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="btn-auth-submit" style="padding: 12px; margin-top: 6px;">
-            Sign In
-          </button>
-        </form>
-
-        <!-- Quick Switch List for Existing Roommates -->
-        <div style="margin-top: 10px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
-          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Quick 1-Click Profile Switcher</span>
-          <div id="quick-profiles-list" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;"></div>
+        <!-- Create New Room Form -->
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 10px;">
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Create a New Room / Flat</h4>
+          <form id="form-create-room" style="display: flex; flex-direction: column; gap: 10px;">
+            <input type="text" id="input-new-room-name" class="form-input" placeholder="Flat Name (e.g. G11 Flat 402)" required>
+            <input type="text" id="input-new-room-code" class="form-input" placeholder="Custom Room Code (e.g. FLAT-402)" style="text-transform: uppercase;">
+            <button type="submit" class="btn btn-primary">Create New Room</button>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: DELETION HISTORY & AUDIT TRAIL -->
-  <div class="modal-backdrop" id="modal-audit">
-    <div class="modal-window" style="max-width: 680px;">
+  <!-- MODAL: PAST CYCLES ARCHIVE -->
+  <div class="modal-backdrop" id="modal-past-cycles">
+    <div class="modal-window" style="max-width: 650px;">
       <div class="modal-header">
-        <h3 class="modal-title">Deletion History & Audit Log</h3>
+        <h3 class="modal-title">Past Settlement Cycles Archive</h3>
         <button class="icon-btn btn-close-modal">✕</button>
       </div>
       <div class="modal-body">
         <p style="font-size: 0.82rem; color: var(--text-muted);">
-          Every deleted entry is archived here with an audit tag of who deleted it and when. Any deleted entry can be restored with a single click.
+          Every time you settle up and start a fresh cycle, the previous period is archived here. You can inspect past settled records or download their CSV anytime.
         </p>
+        <div id="past-cycles-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-close-modal">Close</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- MODAL: DELETION HISTORY & AUDIT TRAIL -->
+  <div class="modal-backdrop" id="modal-audit">
+    <div class="modal-window" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Deletion History & Audit Trail</h3>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.82rem; color: var(--text-muted);">
+          Every deleted entry is archived with an audit tag showing who deleted it and when. Any flatmate can restore a deleted transaction with one click.
+        </p>
         <div id="audit-history-content"></div>
       </div>
       <div class="modal-footer">
@@ -1673,7 +1709,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: 1-CLICK FAST SETTLEMENT DIALOG -->
+  <!-- MODAL: 1-CLICK FAST SETTLEMENT DIALOG -->
   <div class="modal-backdrop" id="modal-settle-up">
     <div class="modal-window" style="max-width: 480px;">
       <div class="modal-header">
@@ -1700,7 +1736,7 @@
 
           <div class="form-group" style="margin-top: 10px;">
             <label class="form-label">Payment Amount (PKR)</label>
-            <input type="number" step="any" min="1" id="settle-input-amount" class="form-input" style="font-size: 1.25rem; font-weight: 700;" required>
+            <input type="number" step="any" min="0.01" id="settle-input-amount" class="form-input" style="font-size: 1.25rem; font-weight: 700;" required>
           </div>
 
           <div class="form-group">
@@ -1728,7 +1764,26 @@
     </div>
   </div>
 
-  <!-- MODAL 4: WHATSAPP SHARE -->
+  <!-- MODAL: USER PROFILE & SIGN OUT -->
+  <div class="modal-backdrop" id="modal-user-menu">
+    <div class="modal-window" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title">My Account</h3>
+        <button class="icon-btn btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div class="avatar-sm" id="user-menu-avatar" style="width: 52px; height: 52px; font-size: 1.4rem; margin: 0 auto 8px auto;">?</div>
+        <h3 id="user-menu-name">User Name</h3>
+        <span id="user-menu-username" style="font-size: 0.8rem; color: var(--text-muted);">@username</span>
+
+        <button class="btn btn-rose" id="btn-sign-out" style="width: 100%; margin-top: 20px;">
+          Sign Out of Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: WHATSAPP SHARE -->
   <div class="modal-backdrop" id="modal-whatsapp">
     <div class="modal-window">
       <div class="modal-header">
@@ -1745,14 +1800,14 @@
     </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
   <!-- =====================================================================
-       JAVASCRIPT APPLICATION ENGINE
+       4. JAVASCRIPT ARCHITECTURE & CLIENT ENGINE
        ===================================================================== -->
   <script>
-    /* 1. MATH ENGINE WITH EXACT INTEGER PAISA MATH */
+    /* MATH ENGINE WITH EXACT INTEGER PAISA MATH */
     const MathEngine = {
       rupeesToPaisa(rupees) {
         if (typeof rupees === 'number') return Math.round(rupees * 100);
@@ -1829,7 +1884,7 @@
         });
 
         entries.forEach(entry => {
-          if (entry.isDeleted) return; // Skip deleted audit items!
+          if (entry.isDeleted) return;
 
           if (entry.type === 'share') {
             const amount = entry.amount;
@@ -1921,59 +1976,28 @@
       }
     };
 
-    /* 2. OFFICIAL BENCHMARK PRESET */
-    const BENCHMARK_ROOMMATES = ["Sanaullah", "Ahmed", "Faizan", "Ali"];
-    const BENCHMARK_ENTRIES = [
-      { id: "b1", type: "share", date: "2026-10-22", category: "Food", desc: "3-person expenses", amount: 141000, payer: "Sanaullah", sharers: ["Sanaullah", "Ahmed", "Faizan"], by: "Sanaullah" },
-      { id: "b2", type: "share", date: "2026-10-22", category: "Groceries", desc: "3-person expenses", amount: 296000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan"], by: "Faizan" },
-      { id: "b3", type: "share", date: "2026-10-22", category: "Electricity", desc: "4-person expenses", amount: 119000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan", "Ali"], by: "Faizan" },
-      { id: "b4", type: "share", date: "2026-10-22", category: "Internet", desc: "4-person expenses", amount: 20000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan", "Ali"], by: "Faizan" },
-      { id: "b5", type: "share", date: "2026-10-22", category: "Water", desc: "4-person expenses", amount: 30000, payer: "Faizan", sharers: ["Sanaullah", "Ahmed", "Faizan", "Ali"], by: "Faizan" },
-      { id: "b6", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Ahmed", amount: 50000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
-      { id: "b7", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Ahmed", amount: 100000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
-      { id: "b8", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Ahmed", amount: 29000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
-      { id: "b9", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Ahmed", amount: 160000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
-      { id: "b10", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Ahmed", amount: 50000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
-      { id: "b11", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Ahmed", amount: 50000, from: "Sanaullah", to: "Ahmed", by: "Sanaullah" },
-      { id: "b12", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Ahmed to Sanaullah", amount: 15000, from: "Ahmed", to: "Sanaullah", by: "Ahmed" },
-      { id: "b13", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Ahmed to Sanaullah", amount: 12000, from: "Ahmed", to: "Sanaullah", by: "Ahmed" },
-      { id: "b14", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Ahmed to Sanaullah", amount: 300000, from: "Ahmed", to: "Sanaullah", by: "Ahmed" },
-      { id: "b15", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Faizan", amount: 20000, from: "Sanaullah", to: "Faizan", by: "Sanaullah" },
-      { id: "b16", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Faizan", amount: 8000, from: "Sanaullah", to: "Faizan", by: "Sanaullah" },
-      { id: "b17", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Sanaullah to Faizan", amount: 35000, from: "Sanaullah", to: "Faizan", by: "Sanaullah" },
-      { id: "b18", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Faizan to Sanaullah", amount: 9000, from: "Faizan", to: "Sanaullah", by: "Faizan" },
-      { id: "b19", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Faizan to Sanaullah", amount: 5000, from: "Faizan", to: "Sanaullah", by: "Faizan" },
-      { id: "b20", type: "pay", date: "2026-10-22", category: "Settlement", desc: "Faizan to Sanaullah", amount: 30000, from: "Faizan", to: "Sanaullah", by: "Faizan" }
-    ];
-
-    /* 3. MULTI-USER AUTHENTICATION STORE */
+    /* AUTHENTICATION & MULTI-USER MANAGER */
     const AuthManager = {
-      KEY_USERS: 'roomates_sheet_accounts_v2',
-      KEY_SESSION: 'roomates_sheet_session_v2',
+      KEY_USERS: 'roomates_users_v3',
+      KEY_SESSION: 'roomates_session_v3',
 
       async hashPassword(password) {
         const encoder = new TextEncoder();
-        const data = encoder.encode(password + "_roomates_salt_2026");
+        const data = encoder.encode(password + "_roomates_secret_salt");
         const hash = await crypto.subtle.digest('SHA-256', data);
         return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       },
 
-      getAccounts() {
+      getUsers() {
         try {
           const raw = localStorage.getItem(this.KEY_USERS);
           if (raw) return JSON.parse(raw);
         } catch(e) {}
-        // Default initial accounts for benchmark flatmates
-        return [
-          { id: 'usr_sanaullah', username: 'sanaullah', name: 'Sanaullah', passHash: 'default', color: '#0d9488' },
-          { id: 'usr_ahmed', username: 'ahmed', name: 'Ahmed', passHash: 'default', color: '#3b82f6' },
-          { id: 'usr_faizan', username: 'faizan', name: 'Faizan', passHash: 'default', color: '#10b981' },
-          { id: 'usr_ali', username: 'ali', name: 'Ali', passHash: 'default', color: '#f59e0b' }
-        ];
+        return []; // 100% clean zero dummy users!
       },
 
-      saveAccounts(accounts) {
-        localStorage.setItem(this.KEY_USERS, JSON.stringify(accounts));
+      saveUsers(users) {
+        localStorage.setItem(this.KEY_USERS, JSON.stringify(users));
       },
 
       getSession() {
@@ -1981,18 +2005,19 @@
           const raw = localStorage.getItem(this.KEY_SESSION);
           if (raw) return JSON.parse(raw);
         } catch(e) {}
-        return { id: 'usr_sanaullah', username: 'sanaullah', name: 'Sanaullah' };
+        return null; // Not logged in by default!
       },
 
       setSession(user) {
-        localStorage.setItem(this.KEY_SESSION, JSON.stringify(user));
+        if (!user) localStorage.removeItem(this.KEY_SESSION);
+        else localStorage.setItem(this.KEY_SESSION, JSON.stringify(user));
       },
 
       async register(name, username, password) {
-        const accounts = this.getAccounts();
+        const users = this.getUsers();
         const u = username.trim().toLowerCase();
-        if (accounts.some(a => a.username.toLowerCase() === u || a.name.toLowerCase() === name.trim().toLowerCase())) {
-          throw new Error('Account or flatmate name already exists.');
+        if (users.some(x => x.username === u)) {
+          throw new Error('Username/email is already taken.');
         }
         const passHash = await this.hashPassword(password);
         const newUser = {
@@ -2000,35 +2025,157 @@
           name: name.trim(),
           username: u,
           passHash,
-          color: '#0d9488',
+          rooms: [],
           createdAt: new Date().toISOString()
         };
-        accounts.push(newUser);
-        this.saveAccounts(accounts);
+        users.push(newUser);
+        this.saveUsers(users);
         this.setSession(newUser);
         return newUser;
       },
 
       async login(username, password) {
-        const accounts = this.getAccounts();
+        const users = this.getUsers();
         const u = username.trim().toLowerCase();
-        const account = accounts.find(a => a.username.toLowerCase() === u || a.name.toLowerCase() === u);
-        if (!account) throw new Error('Account not found.');
-        
-        if (account.passHash !== 'default') {
-          const passHash = await this.hashPassword(password);
-          if (passHash !== account.passHash) {
-            throw new Error('Incorrect password.');
-          }
+        const user = users.find(x => x.username === u || x.name.toLowerCase() === u);
+        if (!user) throw new Error('Account not found. Please register first.');
+        const passHash = await this.hashPassword(password);
+        if (user.passHash !== passHash) {
+          throw new Error('Incorrect password.');
         }
-        this.setSession(account);
-        return account;
+        this.setSession(user);
+        return user;
+      },
+
+      logout() {
+        this.setSession(null);
       }
     };
 
-    /* 4. CSV EXPORTER */
+    /* MULTI-ROOM / FLAT MANAGER (COMPLETE ISOLATION) */
+    const RoomManager = {
+      KEY_ROOMS: 'roomates_rooms_v3',
+      KEY_ACTIVE_ROOM: 'roomates_active_room_v3',
+
+      getRooms() {
+        try {
+          const raw = localStorage.getItem(this.KEY_ROOMS);
+          if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        return {}; // 100% clean zero rooms by default!
+      },
+
+      saveRooms(rooms) {
+        localStorage.setItem(this.KEY_ROOMS, JSON.stringify(rooms));
+      },
+
+      getActiveRoomId() {
+        return localStorage.getItem(this.KEY_ACTIVE_ROOM) || null;
+      },
+
+      setActiveRoomId(id) {
+        if (!id) localStorage.removeItem(this.KEY_ACTIVE_ROOM);
+        else localStorage.setItem(this.KEY_ACTIVE_ROOM, id);
+      },
+
+      createRoom(name, customCode, adminUser) {
+        const rooms = this.getRooms();
+        const code = (customCode || `ROOM-${Math.floor(1000 + Math.random()*9000)}`).trim().toUpperCase();
+        if (rooms[code]) throw new Error(`Room code "${code}" already exists.`);
+
+        const newRoom = {
+          id: code,
+          name: name.trim(),
+          code: code,
+          createdBy: adminUser.name,
+          createdAt: new Date().toISOString(),
+          members: [adminUser.name],
+          activeCycle: "Current Cycle",
+          entries: [],
+          deletedEntries: [],
+          settledCycles: []
+        };
+
+        rooms[code] = newRoom;
+        this.saveRooms(rooms);
+        this.setActiveRoomId(code);
+
+        // Add to user's rooms
+        const users = AuthManager.getUsers();
+        const user = users.find(u => u.id === adminUser.id);
+        if (user) {
+          if (!user.rooms) user.rooms = [];
+          if (!user.rooms.includes(code)) user.rooms.push(code);
+          AuthManager.saveUsers(users);
+          AuthManager.setSession(user);
+        }
+
+        return newRoom;
+      },
+
+      joinRoom(code, user) {
+        const rooms = this.getRooms();
+        const c = code.trim().toUpperCase();
+        if (!rooms[c]) throw new Error(`Room with code "${c}" does not exist.`);
+
+        const room = rooms[c];
+        if (!room.members.includes(user.name)) {
+          room.members.push(user.name);
+          this.saveRooms(rooms);
+        }
+
+        this.setActiveRoomId(c);
+
+        // Add to user's rooms
+        const users = AuthManager.getUsers();
+        const u = users.find(x => x.id === user.id);
+        if (u) {
+          if (!u.rooms) u.rooms = [];
+          if (!u.rooms.includes(c)) u.rooms.push(c);
+          AuthManager.saveUsers(users);
+          AuthManager.setSession(u);
+        }
+
+        return room;
+      },
+
+      closeCycleAndStartFresh(roomId, cycleName) {
+        const rooms = this.getRooms();
+        const room = rooms[roomId];
+        if (!room) return;
+
+        const activeEntries = room.entries.filter(e => !e.isDeleted);
+        const { balances } = MathEngine.calculateBalances(room.members, activeEntries);
+        const settlements = MathEngine.calculateSettlements(balances);
+
+        let totalShared = 0;
+        activeEntries.forEach(e => { if (e.type === 'share') totalShared += e.amount; });
+
+        const archivedCycle = {
+          id: `cycle_${Date.now()}`,
+          name: cycleName || `Cycle ending ${new Date().toLocaleDateString('en-PK')}`,
+          closedAt: new Date().toISOString(),
+          totalShared,
+          entries: [...room.entries],
+          finalBalances: balances,
+          settlements
+        };
+
+        if (!room.settledCycles) room.settledCycles = [];
+        room.settledCycles.unshift(archivedCycle);
+
+        // Reset active entries to completely fresh zero!
+        room.entries = [];
+        room.deletedEntries = [];
+        room.activeCycle = `Cycle started ${new Date().toLocaleDateString('en-PK')}`;
+
+        this.saveRooms(rooms);
+      }
+    };
+
+    /* CSV EXPORTER */
     const CSVExporter = {
-      exportLedger(entries, roomId) {
+      exportLedger(entries, roomName) {
         const active = entries.filter(e => !e.isDeleted);
         const headers = ["ID", "Date", "Type", "Category", "Description", "Amount_PKR", "Payer_or_From", "Sharers_or_To", "Logged_By"];
         
@@ -2055,31 +2202,1063 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `roomates-sheet-${roomId}-${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `roomates-sheet-${roomName}-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
       }
     };
 
-    /* 5. APPLICATION STATE */
-    const AppState = {
-      roommates: [],
-      entries: [],
-      deletedEntries: [], // Audit History
-      currentUser: null,
-      roomId: "FLAT-402",
+    /* APPLICATION CONTROLLER */
+    const App = {
+      user: null,
+      activeRoom: null,
       activeTab: 'dashboard',
-      selectedCycle: 'all',
+      splitMode: 'equal',
       filterType: 'all',
       filterCategory: 'all',
       filterRoommate: 'all',
       searchQuery: '',
+      sortEntriesBy: 'date-desc',
+      sortBalancesBy: 'net-desc',
       editingEntryId: null,
-      splitMode: 'equal',
-      theme: 'system'
+
+      init() {
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        // Check authentication
+        this.user = AuthManager.getSession();
+        if (!this.user) {
+          this.showAuthGate();
+        } else {
+          this.loadUserRoomsAndInit();
+        }
+
+        this.bindEvents();
+      },
+
+      showAuthGate() {
+        document.getElementById('view-auth-gate').style.display = 'flex';
+        document.getElementById('view-app-main').style.display = 'none';
+      },
+
+      loadUserRoomsAndInit() {
+        document.getElementById('view-auth-gate').style.display = 'none';
+        document.getElementById('view-app-main').style.display = 'flex';
+
+        // Check if there is an active room
+        const activeId = RoomManager.getActiveRoomId();
+        const rooms = RoomManager.getRooms();
+
+        // Check URL room parameter for invitation (?room=XYZ)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRoom = urlParams.get('room');
+        if (urlRoom && rooms[urlRoom.toUpperCase()]) {
+          RoomManager.joinRoom(urlRoom, this.user);
+          this.activeRoom = rooms[urlRoom.toUpperCase()];
+        } else if (activeId && rooms[activeId]) {
+          this.activeRoom = rooms[activeId];
+        } else {
+          // If no rooms exist or user has no room, open room modal
+          this.openRoomModal();
+          return;
+        }
+
+        this.renderAll();
+      },
+
+      renderAll() {
+        if (!this.activeRoom) return;
+
+        // Header
+        document.getElementById('header-user-avatar').textContent = this.user.name.charAt(0).toUpperCase();
+        document.getElementById('header-user-name').textContent = this.user.name;
+        document.getElementById('header-room-subtitle').textContent = `Room: ${this.activeRoom.name}`;
+        document.getElementById('header-room-badge-text').textContent = this.activeRoom.name;
+        document.getElementById('stat-room-code-tag').textContent = `Code: ${this.activeRoom.code}`;
+        document.getElementById('room-code-display').textContent = this.activeRoom.code;
+
+        // Share link
+        const inviteUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(this.activeRoom.code)}`;
+        document.getElementById('input-invite-link').value = inviteUrl;
+
+        // Cycle Bar
+        document.getElementById('active-cycle-name').textContent = this.activeRoom.activeCycle || "Current Cycle";
+
+        this.renderDashboard();
+        this.renderEntries();
+        this.renderRoommatesUI();
+        this.renderSharersFormInputs();
+      },
+
+      renderDashboard() {
+        const room = this.activeRoom;
+        const activeEntries = room.entries.filter(e => !e.isDeleted);
+        const { balances, ledgers } = MathEngine.calculateBalances(room.members, activeEntries);
+        const settlements = MathEngine.calculateSettlements(balances);
+
+        // Stats
+        let totalShared = 0;
+        let totalDirect = 0;
+        let sharedCount = 0;
+        let payCount = 0;
+        const catTotals = {};
+
+        activeEntries.forEach(e => {
+          if (e.type === 'share') {
+            totalShared += e.amount;
+            sharedCount++;
+            const cat = e.category || 'Other';
+            catTotals[cat] = (catTotals[cat] || 0) + e.amount;
+          } else if (e.type === 'pay') {
+            totalDirect += e.amount;
+            payCount++;
+          }
+        });
+
+        document.getElementById('stat-total-spend').textContent = MathEngine.formatPaisa(totalShared);
+        document.getElementById('stat-shared-count').textContent = `${sharedCount} shared expenses`;
+        document.getElementById('stat-direct-transfers').textContent = MathEngine.formatPaisa(totalDirect);
+        document.getElementById('stat-pay-count').textContent = `${payCount} direct payments`;
+        document.getElementById('stat-transfers-count').textContent = settlements.length;
+        document.getElementById('stat-roommates-count').textContent = room.members.length;
+        document.getElementById('audit-badge-count').textContent = `Audit (${(room.deletedEntries || []).length})`;
+
+        // Analytics
+        this.renderSpendingAnalytics(totalShared, catTotals);
+
+        // Settlements
+        this.renderSettlements(settlements);
+
+        // Balances
+        this.renderBalances(balances, ledgers);
+      },
+
+      renderSpendingAnalytics(totalShared, catTotals) {
+        const bar = document.getElementById('analytics-bar');
+        const legend = document.getElementById('analytics-legend');
+        document.getElementById('analytics-total-label').textContent = `Total: ${MathEngine.formatPaisa(totalShared)}`;
+
+        if (totalShared === 0) {
+          bar.innerHTML = `<div style="width: 100%; height: 100%; background: var(--border-subtle);"></div>`;
+          legend.innerHTML = `<span style="color: var(--text-muted); font-size: 0.78rem;">No shared expenses logged in this cycle yet. Everything is fresh!</span>`;
+          return;
+        }
+
+        const colors = {
+          'Groceries': '#10b981',
+          'Electricity': '#f59e0b',
+          'Rent': '#6366f1',
+          'Food': '#ec4899',
+          'Internet': '#06b6d4',
+          'Water': '#14b8a6',
+          'Settlement': '#64748b',
+          'Other': '#94a3b8'
+        };
+
+        let barHtml = '';
+        let legendHtml = '';
+        for (const [cat, amt] of Object.entries(catTotals)) {
+          const pct = ((amt / totalShared) * 100).toFixed(1);
+          const col = colors[cat] || '#0d9488';
+          barHtml += `<div class="analytics-segment" style="width: ${pct}%; background: ${col};" title="${cat}: ${pct}% (${MathEngine.formatPaisa(amt)})"></div>`;
+          legendHtml += `
+            <div class="legend-item">
+              <span class="legend-dot" style="background: ${col};"></span>
+              <span><strong>${cat}</strong>: ${MathEngine.formatPaisa(amt)} (${pct}%)</span>
+            </div>
+          `;
+        }
+
+        bar.innerHTML = barHtml;
+        legend.innerHTML = legendHtml;
+      },
+
+      renderSettlements(settlements) {
+        const container = document.getElementById('settlements-list');
+        document.getElementById('settlements-badge').textContent = `${settlements.length} Transfer${settlements.length === 1 ? '' : 's'} Needed`;
+
+        if (settlements.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <strong>All Flatmates Settled to Zero!</strong>
+              <span style="font-size: 0.82rem;">Every roommate's balance is clean and balanced. No cash transfers required.</span>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = settlements.map(s => `
+          <div class="settlement-card">
+            <div class="settlement-flow">
+              <div class="person-chip">
+                <div class="avatar avatar-debtor">${s.from.charAt(0)}</div>
+                <strong>${escapeHTML(s.from)}</strong>
+              </div>
+
+              <div class="flow-arrow">
+                <span style="font-size: 0.7rem; font-weight: 700; color: var(--teal-primary);">pays</span> ➔
+              </div>
+
+              <div class="person-chip">
+                <div class="avatar avatar-creditor">${s.to.charAt(0)}</div>
+                <strong>${escapeHTML(s.to)}</strong>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="settlement-amount">${MathEngine.formatPaisa(s.amount)}</div>
+              <button class="btn btn-emerald btn-sm" onclick="App.openQuickSettle('${escapeHTML(s.from)}', '${escapeHTML(s.to)}', ${s.amount})">
+                Settle Up
+              </button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      renderBalances(balances, ledgers) {
+        const container = document.getElementById('balances-grid');
+        let members = [...this.activeRoom.members];
+
+        // Sort Balances
+        const sort = this.sortBalancesBy;
+        members.sort((a, b) => {
+          const balA = balances[a] || 0;
+          const balB = balances[b] || 0;
+          const paidA = ledgers[a] ? ledgers[a].paidShared : 0;
+          const paidB = ledgers[b] ? ledgers[b].paidShared : 0;
+
+          if (sort === 'net-desc') return balB - balA;
+          if (sort === 'net-asc') return balA - balB;
+          if (sort === 'name-asc') return a.localeCompare(b);
+          if (sort === 'paid-desc') return paidB - paidA;
+          return 0;
+        });
+
+        if (members.length === 0) {
+          container.innerHTML = `<div class="empty-state">No members in this flat yet. Add flatmates in Settings!</div>`;
+          return;
+        }
+
+        container.innerHTML = members.map(p => {
+          const bal = balances[p] || 0;
+          const ledger = ledgers[p] || { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
+          const isMe = this.user && this.user.name === p;
+
+          let statusClass = bal > 0 ? 'receivable' : (bal < 0 ? 'debt' : 'settled');
+          let statusBadge = bal > 0 ? `<span class="badge badge-emerald">Gets Money</span>` : (bal < 0 ? `<span class="badge badge-rose">Owes Money</span>` : `<span class="badge badge-teal">Settled</span>`);
+          let valClass = bal > 0 ? 'positive' : (bal < 0 ? 'negative' : 'zero');
+
+          return `
+            <div class="balance-card ${statusClass}">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="avatar" style="background: #0d9488;">${p.charAt(0)}</div>
+                  <div>
+                    <strong>${escapeHTML(p)}</strong> ${isMe ? '<span style="font-size: 0.7rem; color: var(--teal-primary); font-weight: 700;">(You)</span>' : ''}
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${bal >= 0 ? 'Net Receivable' : 'Net Debt'}</div>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <div class="balance-val ${valClass}">${bal > 0 ? '+' : ''}${MathEngine.formatPaisa(bal)}</div>
+
+              <div class="balance-breakdown">
+                <div>Paid for shared: <strong>${MathEngine.formatPaisa(ledger.paidShared)}</strong></div>
+                <div>Cost of shares: <strong>${MathEngine.formatPaisa(ledger.shareCost)}</strong></div>
+                <div>Direct sent: <strong>${MathEngine.formatPaisa(ledger.paySent)}</strong></div>
+                <div>Direct received: <strong>${MathEngine.formatPaisa(ledger.payReceived)}</strong></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      renderEntries() {
+        const container = document.getElementById('entries-list-container');
+        let filtered = (this.activeRoom.entries || []).filter(e => !e.isDeleted);
+
+        // Filter Type
+        if (this.filterType !== 'all') {
+          filtered = filtered.filter(e => e.type === this.filterType);
+        }
+
+        // Filter Category
+        if (this.filterCategory !== 'all') {
+          filtered = filtered.filter(e => (e.category || 'Other') === this.filterCategory);
+        }
+
+        // Filter Roommate
+        if (this.filterRoommate !== 'all') {
+          const p = this.filterRoommate;
+          filtered = filtered.filter(e => {
+            if (e.type === 'share') return e.payer === p || (e.sharers && e.sharers.includes(p));
+            if (e.type === 'pay') return e.from === p || e.to === p;
+            return false;
+          });
+        }
+
+        // Search Query
+        if (this.searchQuery) {
+          const q = this.searchQuery.toLowerCase();
+          filtered = filtered.filter(e => {
+            return (e.desc || '').toLowerCase().includes(q) ||
+                   (e.payer || '').toLowerCase().includes(q) ||
+                   (e.from || '').toLowerCase().includes(q) ||
+                   (e.to || '').toLowerCase().includes(q) ||
+                   (e.category || '').toLowerCase().includes(q);
+          });
+        }
+
+        // Deep Sorting
+        const sort = this.sortEntriesBy;
+        filtered.sort((a, b) => {
+          if (sort === 'date-desc') return b.date.localeCompare(a.date);
+          if (sort === 'date-asc') return a.date.localeCompare(b.date);
+          if (sort === 'amt-desc') return b.amount - a.amount;
+          if (sort === 'amt-asc') return a.amount - b.amount;
+          if (sort === 'desc-asc') return (a.desc || '').localeCompare(b.desc || '');
+          if (sort === 'payer-asc') return (a.payer || a.from || '').localeCompare(b.payer || b.from || '');
+          return 0;
+        });
+
+        document.getElementById('entries-count-badge').textContent = `${filtered.length} Entries`;
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">🔍</div>
+              <strong>No transactions found</strong>
+              <span style="font-size: 0.8rem;">Try clearing your filters or add a new transaction.</span>
+            </div>
+          `;
+          return;
+        }
+
+        const categoryIcons = {
+          'Groceries': '🛒',
+          'Electricity': '⚡',
+          'Rent': '🏠',
+          'Food': '🍲',
+          'Internet': '📶',
+          'Water': '💧',
+          'Settlement': '🤝',
+          'Other': '📦'
+        };
+
+        container.innerHTML = filtered.map(e => {
+          const isShare = e.type === 'share';
+          const icon = categoryIcons[e.category] || (isShare ? '🛒' : '🤝');
+          const detail = isShare 
+            ? `<span>Paid by <strong>${escapeHTML(e.payer)}</strong></span> • <span>${(e.sharers||[]).length} sharers</span>`
+            : `<span><strong>${escapeHTML(e.from)}</strong> paid <strong>${escapeHTML(e.to)}</strong></span>`;
+
+          return `
+            <div class="entry-card">
+              <div class="entry-left">
+                <div class="entry-icon-box" style="background: var(--bg-card-subtle);">${icon}</div>
+                <div class="entry-info">
+                  <div class="entry-title">${escapeHTML(e.desc)}</div>
+                  <div class="entry-meta">
+                    <span class="badge badge-teal" style="font-size: 0.68rem;">${e.category || 'General'}</span>
+                    <span>${e.date}</span>
+                    <span>•</span>
+                    ${detail}
+                    ${e.by ? `<span style="color: var(--teal-primary);">by ${escapeHTML(e.by)}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <div class="entry-right">
+                <div class="entry-amount">${MathEngine.formatPaisa(e.amount)}</div>
+                <div class="entry-actions">
+                  <button class="entry-action-btn" onclick="App.startEditEntry('${e.id}')" title="Edit">✏️</button>
+                  <button class="entry-action-btn btn-del" onclick="App.deleteEntry('${e.id}')" title="Delete">🗑️</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      renderRoommatesUI() {
+        const room = this.activeRoom;
+        document.getElementById('roommates-active-badge').textContent = `${room.members.length} Flatmates`;
+
+        const options = room.members.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+        document.getElementById('select-payer').innerHTML = options;
+        document.getElementById('select-pay-from').innerHTML = options;
+        document.getElementById('select-pay-to').innerHTML = options;
+        document.getElementById('filter-roommate').innerHTML = `<option value="all">All Roommates</option>` + options;
+
+        if (this.user && room.members.includes(this.user.name)) {
+          document.getElementById('select-payer').value = this.user.name;
+          document.getElementById('select-pay-from').value = this.user.name;
+        }
+
+        document.getElementById('roommates-chips-container').innerHTML = room.members.map(p => `
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--bg-card-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); font-size: 0.85rem;">
+            <div class="avatar-sm" style="width: 20px; height: 20px; font-size: 0.7rem;">${p.charAt(0)}</div>
+            <span>${escapeHTML(p)}</span>
+            <button style="border: none; background: none; color: var(--rose-debt); cursor: pointer; font-size: 0.8rem; margin-left: 2px;" onclick="App.removeRoommate('${escapeHTML(p)}')">✕</button>
+          </div>
+        `).join('');
+      },
+
+      renderSharersFormInputs() {
+        const container = document.getElementById('sharers-inputs-container');
+        const mode = this.splitMode;
+        const members = this.activeRoom ? this.activeRoom.members : [];
+
+        container.innerHTML = members.map(p => {
+          let extraInput = '';
+          if (mode === 'exact') {
+            extraInput = `<input type="number" step="any" min="0" class="custom-split-input custom-val" data-person="${escapeHTML(p)}" placeholder="0.00">`;
+          } else if (mode === 'shares') {
+            extraInput = `<input type="number" step="1" min="1" value="1" class="custom-split-input custom-val" data-person="${escapeHTML(p)}"> <span style="font-size: 0.75rem;">share</span>`;
+          } else if (mode === 'percent') {
+            const defPct = members.length > 0 ? (100 / members.length).toFixed(1) : '100';
+            extraInput = `<input type="number" step="any" min="0" max="100" value="${defPct}" class="custom-split-input custom-val" data-person="${escapeHTML(p)}"> %`;
+          }
+
+          return `
+            <div class="custom-split-row">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" class="chk-sharer" value="${escapeHTML(p)}" checked>
+                <strong>${escapeHTML(p)}</strong>
+              </label>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                ${extraInput}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.querySelectorAll('input').forEach(i => i.addEventListener('input', () => this.updateSplitPreview()));
+        this.updateSplitPreview();
+      },
+
+      updateSplitPreview() {
+        const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('input-amount').value);
+        document.getElementById('paisa-preview').textContent = `${amtPaisa.toLocaleString()} paisa`;
+
+        const checked = [];
+        const customVals = {};
+        document.querySelectorAll('.chk-sharer:checked').forEach(c => {
+          checked.push(c.value);
+          const input = document.querySelector(`.custom-val[data-person="${c.value}"]`);
+          if (input) customVals[c.value] = input.value;
+        });
+
+        if (amtPaisa <= 0 || checked.length === 0) {
+          document.getElementById('preview-split-detail').textContent = 'Enter an amount and select flatmates to preview split.';
+          return;
+        }
+
+        const shares = MathEngine.calculateSplitShares(amtPaisa, checked, this.splitMode, customVals);
+        let html = checked.map(p => `<strong>${escapeHTML(p)}</strong>: ${MathEngine.formatPaisa(shares[p])}`).join(' • ');
+        document.getElementById('preview-split-detail').innerHTML = html;
+      },
+
+      openRoomModal() {
+        const container = document.getElementById('user-rooms-list');
+        const rooms = RoomManager.getRooms();
+        const roomKeys = Object.keys(rooms);
+
+        if (roomKeys.length === 0) {
+          container.innerHTML = `<div class="empty-state" style="padding: 10px;">No rooms found. Create your flat below to get started!</div>`;
+        } else {
+          container.innerHTML = roomKeys.map(k => {
+            const r = rooms[k];
+            const isActive = this.activeRoom && this.activeRoom.id === r.id;
+            return `
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+                <div>
+                  <strong>${escapeHTML(r.name)}</strong>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Code: <code>${r.code}</code> • ${r.members.length} members</div>
+                </div>
+                <button class="btn ${isActive ? 'btn-emerald' : 'btn-secondary'} btn-sm" onclick="App.selectRoom('${r.id}')">
+                  ${isActive ? 'Active' : 'Switch Room'}
+                </button>
+              </div>
+            `;
+          }).join('');
+        }
+
+        document.getElementById('modal-room-manager').classList.add('open');
+      },
+
+      selectRoom(roomId) {
+        RoomManager.setActiveRoomId(roomId);
+        this.activeRoom = RoomManager.getRooms()[roomId];
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+        this.renderAll();
+        showToast(`Switched to room: ${this.activeRoom.name}`);
+      },
+
+      openQuickSettle(debtor, creditor, amountPaisa) {
+        document.getElementById('settle-from-name').textContent = debtor;
+        document.getElementById('settle-from-avatar').textContent = debtor.charAt(0);
+        document.getElementById('settle-to-name').textContent = creditor;
+        document.getElementById('settle-to-avatar').textContent = creditor.charAt(0);
+        document.getElementById('settle-input-amount').value = (amountPaisa / 100).toFixed(2);
+        document.getElementById('settle-input-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('modal-settle-up').classList.add('open');
+      },
+
+      openPastCyclesModal() {
+        const container = document.getElementById('past-cycles-list');
+        const cycles = this.activeRoom.settledCycles || [];
+
+        if (cycles.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📚</div>
+              <strong>No Past Cycles Yet</strong>
+              <span style="font-size: 0.82rem;">When you click "Settle All & Start Fresh", the closed period will be archived here!</span>
+            </div>
+          `;
+        } else {
+          container.innerHTML = cycles.map((c, idx) => `
+            <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <strong>${escapeHTML(c.name)}</strong>
+                <span class="badge badge-emerald">Settled & Closed</span>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">
+                Closed: ${new Date(c.closedAt).toLocaleString('en-PK')} • Total Spend: ${MathEngine.formatPaisa(c.totalShared)} • ${c.entries.length} transactions
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="App.exportPastCycleCSV(${idx})">Download Cycle CSV</button>
+            </div>
+          `).join('');
+        }
+
+        document.getElementById('modal-past-cycles').classList.add('open');
+      },
+
+      exportPastCycleCSV(idx) {
+        const cycle = this.activeRoom.settledCycles[idx];
+        if (cycle) {
+          CSVExporter.exportLedger(cycle.entries, `${this.activeRoom.name}-${cycle.name}`);
+        }
+      },
+
+      openAuditModal() {
+        const container = document.getElementById('audit-history-content');
+        const deleted = this.activeRoom.deletedEntries || [];
+
+        if (deleted.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <strong>Audit Log Clean</strong>
+              <span style="font-size: 0.8rem;">No deleted entries in this room. Active ledger has 100% integrity.</span>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Deleted By</th>
+                    <th>Deleted At</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${deleted.map(d => `
+                    <tr>
+                      <td>${d.date}</td>
+                      <td><strong>${escapeHTML(d.desc)}</strong></td>
+                      <td>${MathEngine.formatPaisa(d.amount)}</td>
+                      <td><span class="badge badge-rose">${escapeHTML(d.deletedBy)}</span></td>
+                      <td style="font-size: 0.72rem; color: var(--text-muted);">${new Date(d.deletedAt).toLocaleString('en-PK')}</td>
+                      <td>
+                        <button class="btn btn-emerald btn-sm" onclick="App.restoreEntry('${d.id}')">Restore</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+        document.getElementById('modal-audit').classList.add('open');
+      },
+
+      deleteEntry(id) {
+        const entry = this.activeRoom.entries.find(e => String(e.id) === String(id));
+        if (!entry) return;
+
+        if (!confirm(`Delete "${entry.desc}" (Rs. ${(entry.amount/100).toFixed(2)})? It will be archived in the Audit History.`)) return;
+
+        entry.isDeleted = true;
+        if (!this.activeRoom.deletedEntries) this.activeRoom.deletedEntries = [];
+        this.activeRoom.deletedEntries.unshift({
+          ...entry,
+          deletedAt: new Date().toISOString(),
+          deletedBy: this.user ? this.user.name : 'Unknown'
+        });
+
+        this.saveCurrentRoom();
+        this.renderDashboard();
+        this.renderEntries();
+        showToast(`Moved "${entry.desc}" to Audit History.`);
+      },
+
+      restoreEntry(id) {
+        const entry = this.activeRoom.entries.find(e => String(e.id) === String(id));
+        if (entry) entry.isDeleted = false;
+        this.activeRoom.deletedEntries = this.activeRoom.deletedEntries.filter(e => String(e.id) !== String(id));
+
+        this.saveCurrentRoom();
+        this.openAuditModal();
+        this.renderDashboard();
+        this.renderEntries();
+        showToast('Restored transaction to active ledger!');
+      },
+
+      startEditEntry(id) {
+        const entry = this.activeRoom.entries.find(e => String(e.id) === String(id));
+        if (!entry) return;
+
+        this.editingEntryId = entry.id;
+        document.getElementById('entry-edit-id').value = entry.id;
+        document.getElementById('input-amount').value = (entry.amount / 100).toFixed(2);
+        document.getElementById('input-date').value = entry.date;
+        document.getElementById('input-desc').value = entry.desc;
+        document.getElementById('select-category').value = entry.category || 'Other';
+
+        document.getElementById('form-heading').innerHTML = `✏️ Edit Transaction`;
+        document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
+
+        if (entry.type === 'share') {
+          this.setTransactionType('share');
+          document.getElementById('select-payer').value = entry.payer;
+        } else {
+          this.setTransactionType('pay');
+          document.getElementById('select-pay-from').value = entry.from;
+          document.getElementById('select-pay-to').value = entry.to;
+        }
+
+        this.switchTab('add');
+      },
+
+      resetForm() {
+        this.editingEntryId = null;
+        document.getElementById('entry-edit-id').value = '';
+        document.getElementById('transaction-form').reset();
+        document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('form-heading').innerHTML = `➕ Add New Transaction`;
+        document.getElementById('btn-cancel-edit').style.display = 'none';
+        this.setTransactionType('share');
+        this.renderSharersFormInputs();
+      },
+
+      setTransactionType(type) {
+        if (type === 'share') {
+          document.getElementById('btn-type-share').className = 'btn btn-primary';
+          document.getElementById('btn-type-pay').className = 'btn btn-secondary';
+          document.getElementById('fields-share').style.display = 'block';
+          document.getElementById('fields-pay').style.display = 'none';
+        } else {
+          document.getElementById('btn-type-share').className = 'btn btn-secondary';
+          document.getElementById('btn-type-pay').className = 'btn btn-primary';
+          document.getElementById('fields-share').style.display = 'none';
+          document.getElementById('fields-pay').style.display = 'block';
+        }
+      },
+
+      switchTab(tab) {
+        this.activeTab = tab;
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.toggle('active', v.id === `view-${tab}`));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      saveCurrentRoom() {
+        const rooms = RoomManager.getRooms();
+        rooms[this.activeRoom.id] = this.activeRoom;
+        RoomManager.saveRooms(rooms);
+      },
+
+      removeRoommate(name) {
+        if (this.activeRoom.members.length <= 1) {
+          alert('Cannot remove the only flatmate in the room.');
+          return;
+        }
+        this.activeRoom.members = this.activeRoom.members.filter(m => m !== name);
+        this.saveCurrentRoom();
+        this.renderRoommatesUI();
+        this.renderDashboard();
+        showToast(`Removed "${name}" from room.`);
+      },
+
+      bindEvents() {
+        // Auth Gate Tabs
+        document.getElementById('btn-gate-tab-login').addEventListener('click', () => {
+          document.getElementById('btn-gate-tab-login').className = 'btn btn-primary';
+          document.getElementById('btn-gate-tab-register').className = 'btn btn-ghost';
+          document.getElementById('gate-group-name').style.display = 'none';
+          document.getElementById('btn-gate-submit').textContent = 'Sign In';
+        });
+
+        document.getElementById('btn-gate-tab-register').addEventListener('click', () => {
+          document.getElementById('btn-gate-tab-login').className = 'btn btn-ghost';
+          document.getElementById('btn-gate-tab-register').className = 'btn btn-primary';
+          document.getElementById('gate-group-name').style.display = 'flex';
+          document.getElementById('btn-gate-submit').textContent = 'Create Account';
+        });
+
+        // Auth Gate Form Submit
+        document.getElementById('form-gate-auth').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const isReg = document.getElementById('gate-group-name').style.display !== 'none';
+          const user = document.getElementById('gate-input-user').value;
+          const pass = document.getElementById('gate-input-pass').value;
+
+          try {
+            if (isReg) {
+              const name = document.getElementById('gate-input-name').value;
+              if (!name.trim()) throw new Error('Please enter your full name.');
+              const newUser = await AuthManager.register(name, user, pass);
+              this.user = newUser;
+              showToast(`Welcome, ${name}!`);
+            } else {
+              const loggedUser = await AuthManager.login(user, pass);
+              this.user = loggedUser;
+              showToast(`Welcome back, ${loggedUser.name}!`);
+            }
+            this.loadUserRoomsAndInit();
+          } catch(err) {
+            alert(err.message);
+          }
+        });
+
+        // Navigation Tabs
+        document.querySelectorAll('.nav-tab').forEach(t => {
+          t.addEventListener('click', () => this.switchTab(t.dataset.tab));
+        });
+        document.getElementById('fab-add-trans').addEventListener('click', () => {
+          this.resetForm();
+          this.switchTab('add');
+        });
+        document.getElementById('btn-brand-home').addEventListener('click', () => this.switchTab('dashboard'));
+
+        // Modals Open/Close
+        document.getElementById('btn-open-room-switcher').addEventListener('click', () => this.openRoomModal());
+        document.getElementById('btn-open-audit').addEventListener('click', () => this.openAuditModal());
+        document.getElementById('btn-open-past-cycles').addEventListener('click', () => this.openPastCyclesModal());
+        document.getElementById('btn-open-user-menu').addEventListener('click', () => {
+          document.getElementById('user-menu-avatar').textContent = this.user.name.charAt(0).toUpperCase();
+          document.getElementById('user-menu-name').textContent = this.user.name;
+          document.getElementById('user-menu-username').textContent = `@${this.user.username}`;
+          document.getElementById('modal-user-menu').classList.add('open');
+        });
+
+        document.querySelectorAll('.btn-close-modal').forEach(b => {
+          b.addEventListener('click', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+          });
+        });
+
+        // Sign Out
+        document.getElementById('btn-sign-out').addEventListener('click', () => {
+          AuthManager.logout();
+          this.user = null;
+          this.activeRoom = null;
+          document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+          this.showAuthGate();
+          showToast('Signed out successfully.');
+        });
+
+        // Create Room Form
+        document.getElementById('form-create-room').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = document.getElementById('input-new-room-name').value;
+          const code = document.getElementById('input-new-room-code').value;
+          try {
+            const newRoom = RoomManager.createRoom(name, code, this.user);
+            this.activeRoom = newRoom;
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+            this.renderAll();
+            showToast(`Room "${newRoom.name}" created!`);
+          } catch(err) {
+            alert(err.message);
+          }
+        });
+
+        // Join Room Form
+        document.getElementById('form-join-room').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const code = document.getElementById('input-join-code').value;
+          try {
+            const room = RoomManager.joinRoom(code, this.user);
+            this.activeRoom = room;
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+            this.renderAll();
+            showToast(`Joined room "${room.name}"!`);
+          } catch(err) {
+            alert(err.message);
+          }
+        });
+
+        // Settle-to-Zero and Start Fresh Button
+        document.getElementById('btn-close-cycle').addEventListener('click', () => {
+          const cycleName = prompt("Enter a name for this closed cycle (e.g., 'October 2026 Settlement' or 'Week 42 Settle'):", `Cycle ending ${new Date().toLocaleDateString('en-PK')}`);
+          if (!cycleName) return;
+
+          RoomManager.closeCycleAndStartFresh(this.activeRoom.id, cycleName);
+          this.activeRoom = RoomManager.getRooms()[this.activeRoom.id];
+          this.renderAll();
+          showToast(`✓ All balances settled to zero! Saved "${cycleName}" to archive.`);
+        });
+
+        // Deep Sorting & Filtering in Ledger
+        document.getElementById('sort-entries').addEventListener('change', (e) => {
+          this.sortEntriesBy = e.target.value;
+          this.renderEntries();
+        });
+
+        document.getElementById('sort-balances').addEventListener('change', (e) => {
+          this.sortBalancesBy = e.target.value;
+          const activeEntries = this.activeRoom.entries.filter(x => !x.isDeleted);
+          const { balances, ledgers } = MathEngine.calculateBalances(this.activeRoom.members, activeEntries);
+          this.renderBalances(balances, ledgers);
+        });
+
+        document.getElementById('filter-search').addEventListener('input', (e) => {
+          this.searchQuery = e.target.value;
+          this.renderEntries();
+        });
+
+        document.querySelectorAll('[data-filter-type]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-filter-type]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.filterType = btn.dataset.filterType;
+            this.renderEntries();
+          });
+        });
+
+        document.getElementById('filter-category').addEventListener('change', (e) => {
+          this.filterCategory = e.target.value;
+          this.renderEntries();
+        });
+
+        document.getElementById('filter-roommate').addEventListener('change', (e) => {
+          this.filterRoommate = e.target.value;
+          this.renderEntries();
+        });
+
+        // CSV Export
+        const exportCSV = () => CSVExporter.exportLedger(this.activeRoom.entries, this.activeRoom.name);
+        document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
+        document.getElementById('btn-settings-export-csv').addEventListener('click', exportCSV);
+
+        // Add Transaction Handlers
+        document.getElementById('btn-type-share').addEventListener('click', () => this.setTransactionType('share'));
+        document.getElementById('btn-type-pay').addEventListener('click', () => this.setTransactionType('pay'));
+        document.getElementById('input-amount').addEventListener('input', () => this.updateSplitPreview());
+
+        document.querySelectorAll('.preset-chips .chip-btn[data-amt]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const cur = parseFloat(document.getElementById('input-amount').value) || 0;
+            document.getElementById('input-amount').value = (cur + parseFloat(btn.dataset.amt)).toFixed(2);
+            this.updateSplitPreview();
+          });
+        });
+
+        document.querySelectorAll('.preset-chips .chip-btn[data-desc]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.getElementById('input-desc').value = btn.dataset.desc;
+          });
+        });
+
+        // Split Mode Tabs
+        document.querySelectorAll('.split-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            this.splitMode = tab.dataset.split;
+            this.renderSharersFormInputs();
+          });
+        });
+
+        document.getElementById('btn-select-all-sharers').addEventListener('click', () => {
+          document.querySelectorAll('.chk-sharer').forEach(c => c.checked = true);
+          this.updateSplitPreview();
+        });
+
+        document.getElementById('btn-clear-sharers').addEventListener('click', () => {
+          document.querySelectorAll('.chk-sharer').forEach(c => c.checked = false);
+          this.updateSplitPreview();
+        });
+
+        document.getElementById('btn-cancel-edit').addEventListener('click', () => this.resetForm());
+
+        // Submit Transaction
+        document.getElementById('transaction-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const type = document.getElementById('btn-type-share').classList.contains('btn-primary') ? 'share' : 'pay';
+          const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('input-amount').value);
+          const date = document.getElementById('input-date').value;
+          const desc = document.getElementById('input-desc').value.trim();
+          const category = document.getElementById('select-category').value;
+
+          if (amtPaisa <= 0) {
+            alert('Amount must be positive.');
+            return;
+          }
+
+          let entry = null;
+
+          if (type === 'share') {
+            const payer = document.getElementById('select-payer').value;
+            const sharers = [];
+            const customVals = {};
+            document.querySelectorAll('.chk-sharer:checked').forEach(c => {
+              sharers.push(c.value);
+              const input = document.querySelector(`.custom-val[data-person="${c.value}"]`);
+              if (input) customVals[c.value] = input.value;
+            });
+
+            if (sharers.length === 0) {
+              alert('Select at least one flatmate to split with.');
+              return;
+            }
+
+            const shares = MathEngine.calculateSplitShares(amtPaisa, sharers, this.splitMode, customVals);
+
+            entry = {
+              id: this.editingEntryId || `trans_${Date.now()}`,
+              type: 'share',
+              category,
+              desc,
+              amount: amtPaisa,
+              date,
+              payer,
+              sharers,
+              splitMode: this.splitMode,
+              customValues: customVals,
+              shares,
+              by: this.user ? this.user.name : payer,
+              isDeleted: false
+            };
+          } else {
+            const from = document.getElementById('select-pay-from').value;
+            const to = document.getElementById('select-pay-to').value;
+            if (from === to) {
+              alert('Payer and receiver cannot be the same person.');
+              return;
+            }
+
+            entry = {
+              id: this.editingEntryId || `trans_${Date.now()}`,
+              type: 'pay',
+              category: 'Settlement',
+              desc,
+              amount: amtPaisa,
+              date,
+              from,
+              to,
+              by: this.user ? this.user.name : from,
+              isDeleted: false
+            };
+          }
+
+          if (this.editingEntryId) {
+            const idx = this.activeRoom.entries.findIndex(x => String(x.id) === String(this.editingEntryId));
+            if (idx !== -1) this.activeRoom.entries[idx] = entry;
+            showToast('Updated transaction!');
+          } else {
+            this.activeRoom.entries.unshift(entry);
+            showToast('Recorded new transaction!');
+          }
+
+          this.saveCurrentRoom();
+          this.resetForm();
+          this.renderDashboard();
+          this.renderEntries();
+          this.switchTab('dashboard');
+        });
+
+        // 1-Click Fast Settlement Form Submit
+        document.getElementById('form-quick-settle').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const debtor = document.getElementById('settle-from-name').textContent;
+          const creditor = document.getElementById('settle-to-name').textContent;
+          const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('settle-input-amount').value);
+          const method = document.getElementById('settle-payment-method').value;
+          const date = document.getElementById('settle-input-date').value;
+
+          const newEntry = {
+            id: `settle_${Date.now()}`,
+            type: 'pay',
+            category: 'Settlement',
+            desc: `Settlement (${method}): ${debtor} to ${creditor}`,
+            amount: amtPaisa,
+            date,
+            from: debtor,
+            to: creditor,
+            by: this.user ? this.user.name : debtor,
+            isDeleted: false
+          };
+
+          this.activeRoom.entries.unshift(newEntry);
+          this.saveCurrentRoom();
+          document.getElementById('modal-settle-up').classList.remove('open');
+          this.renderDashboard();
+          this.renderEntries();
+          showToast(`✓ Recorded settlement: ${debtor} paid ${creditor}!`);
+        });
+
+        // Add Roommate to Flat
+        document.getElementById('add-roommate-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = document.getElementById('input-new-roommate').value.trim();
+          if (!name) return;
+          if (this.activeRoom.members.some(m => m.toLowerCase() === name.toLowerCase())) {
+            alert('Flatmate already exists in this room.');
+            return;
+          }
+          this.activeRoom.members.push(name);
+          this.saveCurrentRoom();
+          document.getElementById('input-new-roommate').value = '';
+          this.renderRoommatesUI();
+          this.renderDashboard();
+          showToast(`Added "${name}" to room!`);
+        });
+
+        // Copy / Share Invite Link
+        document.getElementById('btn-copy-invite-link').addEventListener('click', () => {
+          const link = document.getElementById('input-invite-link').value;
+          navigator.clipboard.writeText(link).then(() => showToast('Invite link copied!'));
+        });
+
+        document.getElementById('btn-share-invite-whatsapp').addEventListener('click', () => {
+          const link = document.getElementById('input-invite-link').value;
+          const text = `*Join our Flat on Roomates Sheet* 🏠\nHey flatmates! Join our room *${this.activeRoom.name}* (Code: *${this.activeRoom.code}*) to log expenses and settle up:\n${link}`;
+          window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+        });
+
+        // Theme Toggle
+        document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+          const cur = document.body.getAttribute('data-theme');
+          const next = cur === 'dark' ? 'light' : 'dark';
+          document.body.setAttribute('data-theme', next);
+        });
+      }
     };
 
-    /* 6. TOAST NOTIFICATION */
     function showToast(message, duration = 3000) {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -2094,1101 +3273,12 @@
       }, duration);
     }
 
-    /* 7. STATE PERSISTENCE */
-    function saveState() {
-      localStorage.setItem('roomates_sheet_people_v2', JSON.stringify(AppState.roommates));
-      localStorage.setItem('roomates_sheet_entries_v2', JSON.stringify(AppState.entries));
-      localStorage.setItem('roomates_sheet_audit_deleted_v2', JSON.stringify(AppState.deletedEntries));
-      localStorage.setItem('roomates_sheet_room_v2', AppState.roomId);
-    }
-
-    function loadState() {
-      try {
-        const rawP = localStorage.getItem('roomates_sheet_people_v2');
-        AppState.roommates = rawP ? JSON.parse(rawP) : [...BENCHMARK_ROOMMATES];
-
-        const rawE = localStorage.getItem('roomates_sheet_entries_v2');
-        AppState.entries = rawE ? JSON.parse(rawE) : JSON.parse(JSON.stringify(BENCHMARK_ENTRIES));
-
-        const rawD = localStorage.getItem('roomates_sheet_audit_deleted_v2');
-        AppState.deletedEntries = rawD ? JSON.parse(rawD) : [];
-
-        AppState.roomId = localStorage.getItem('roomates_sheet_room_v2') || "FLAT-402";
-      } catch(e) {
-        AppState.roommates = [...BENCHMARK_ROOMMATES];
-        AppState.entries = JSON.parse(JSON.stringify(BENCHMARK_ENTRIES));
-        AppState.deletedEntries = [];
-      }
-      AppState.currentUser = AuthManager.getSession();
-    }
-
-    /* 8. UI TAB SWITCHER */
-    function switchTab(tabName) {
-      AppState.activeTab = tabName;
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
-      document.querySelectorAll('.tab-view').forEach(v => v.classList.toggle('active', v.id === `view-${tabName}`));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /* 9. RENDERING ENGINES */
-    function renderDashboard() {
-      // 1. Filter by Cycle
-      let activeEntries = AppState.entries.filter(e => !e.isDeleted);
-      if (AppState.selectedCycle !== 'all') {
-        activeEntries = activeEntries.filter(e => e.date.startsWith(AppState.selectedCycle));
-      }
-
-      const { balances, ledgers } = MathEngine.calculateBalances(AppState.roommates, activeEntries);
-      const settlements = MathEngine.calculateSettlements(balances);
-
-      // Stats
-      let totalShared = 0;
-      let totalDirect = 0;
-      let sharedCount = 0;
-      let payCount = 0;
-
-      const categoryTotals = {};
-
-      activeEntries.forEach(e => {
-        if (e.type === 'share') {
-          totalShared += e.amount;
-          sharedCount++;
-          const cat = e.category || 'Other';
-          categoryTotals[cat] = (categoryTotals[cat] || 0) + e.amount;
-        } else if (e.type === 'pay') {
-          totalDirect += e.amount;
-          payCount++;
-        }
-      });
-
-      document.getElementById('stat-total-spend').textContent = MathEngine.formatPaisa(totalShared);
-      document.getElementById('stat-shared-count').textContent = `${sharedCount} shared expenses`;
-      document.getElementById('stat-direct-transfers').textContent = MathEngine.formatPaisa(totalDirect);
-      document.getElementById('stat-pay-count').textContent = `${payCount} direct settlements`;
-      document.getElementById('stat-transfers-count').textContent = settlements.length;
-      document.getElementById('stat-roommates-count').textContent = AppState.roommates.length;
-      document.getElementById('stat-room-id').textContent = `Room: ${AppState.roomId}`;
-
-      // Analytics Bar
-      renderSpendingAnalytics(totalShared, categoryTotals);
-
-      // Settlements List
-      renderSettlementsList(settlements);
-
-      // Balances Grid
-      renderBalancesGrid(balances, ledgers);
-
-      // Update Audit badge count
-      document.getElementById('audit-badge-count').textContent = `Audit (${AppState.deletedEntries.length})`;
-    }
-
-    function renderSpendingAnalytics(totalShared, categoryTotals) {
-      const bar = document.getElementById('analytics-bar');
-      const legend = document.getElementById('analytics-legend');
-      document.getElementById('analytics-total-label').textContent = `Total: ${MathEngine.formatPaisa(totalShared)}`;
-
-      if (totalShared === 0) {
-        bar.innerHTML = `<div style="width: 100%; height: 100%; background: var(--border-subtle);"></div>`;
-        legend.innerHTML = `<span style="color: var(--text-muted); font-size: 0.78rem;">No shared expenses logged in this cycle.</span>`;
-        return;
-      }
-
-      const colors = {
-        'Groceries': '#10b981',
-        'Electricity': '#f59e0b',
-        'Rent': '#6366f1',
-        'Food': '#ec4899',
-        'Internet': '#06b6d4',
-        'Water': '#14b8a6',
-        'Settlement': '#64748b',
-        'Other': '#94a3b8'
-      };
-
-      let barHtml = '';
-      let legendHtml = '';
-
-      for (const [cat, amt] of Object.entries(categoryTotals)) {
-        const pct = ((amt / totalShared) * 100).toFixed(1);
-        const col = colors[cat] || '#0d9488';
-        barHtml += `<div class="analytics-segment" style="width: ${pct}%; background: ${col};" title="${cat}: ${pct}% (${MathEngine.formatPaisa(amt)})"></div>`;
-        legendHtml += `
-          <div class="legend-item">
-            <span class="legend-dot" style="background: ${col};"></span>
-            <span><strong>${cat}</strong>: ${MathEngine.formatPaisa(amt)} (${pct}%)</span>
-          </div>
-        `;
-      }
-
-      bar.innerHTML = barHtml;
-      legend.innerHTML = legendHtml;
-    }
-
-    function renderSettlementsList(settlements) {
-      const container = document.getElementById('settlements-list');
-      document.getElementById('settlements-badge').textContent = `${settlements.length} Transfer${settlements.length === 1 ? '' : 's'} Needed`;
-
-      if (settlements.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">✓</div>
-            <strong>All Balances Settled!</strong>
-            <span style="font-size: 0.8rem;">No cash transfers required for this cycle.</span>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = settlements.map(s => `
-        <div class="settlement-card">
-          <div class="settlement-flow">
-            <div class="person-chip">
-              <div class="avatar avatar-debtor">${s.from.charAt(0)}</div>
-              <strong>${escapeHTML(s.from)}</strong>
-            </div>
-
-            <div class="flow-arrow">
-              <span class="flow-badge">pays</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </div>
-
-            <div class="person-chip">
-              <div class="avatar avatar-creditor">${s.to.charAt(0)}</div>
-              <strong>${escapeHTML(s.to)}</strong>
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="settlement-amount">${MathEngine.formatPaisa(s.amount)}</div>
-            <button class="btn btn-emerald btn-sm" onclick="openQuickSettleModal('${escapeHTML(s.from)}', '${escapeHTML(s.to)}', ${s.amount})">
-              Settle Up
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderBalancesGrid(balances, ledgers) {
-      const container = document.getElementById('balances-grid');
-      container.innerHTML = AppState.roommates.map(p => {
-        const bal = balances[p] || 0;
-        const ledger = ledgers[p] || { paidShared: 0, shareCost: 0, paySent: 0, payReceived: 0 };
-        const isMe = AppState.currentUser && AppState.currentUser.name === p;
-
-        let statusClass = bal > 0 ? 'receivable' : (bal < 0 ? 'debt' : 'settled');
-        let statusBadge = bal > 0 ? `<span class="badge badge-emerald">Gets Money</span>` : (bal < 0 ? `<span class="badge badge-rose">Owes Money</span>` : `<span class="badge badge-teal">Settled</span>`);
-        let valClass = bal > 0 ? 'positive' : (bal < 0 ? 'negative' : 'zero');
-
-        return `
-          <div class="balance-card ${statusClass}">
-            <div class="balance-card-header">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div class="avatar" style="background: #0d9488;">${p.charAt(0)}</div>
-                <div>
-                  <strong>${escapeHTML(p)}</strong> ${isMe ? '<span style="font-size: 0.7rem; color: var(--teal-primary); font-weight: 700;">(You)</span>' : ''}
-                  <div style="font-size: 0.72rem; color: var(--text-muted);">${bal >= 0 ? 'Net Receivable' : 'Net Debt'}</div>
-                </div>
-              </div>
-              ${statusBadge}
-            </div>
-
-            <div class="balance-val ${valClass}">${bal > 0 ? '+' : ''}${MathEngine.formatPaisa(bal)}</div>
-
-            <div class="balance-breakdown">
-              <div>Paid for shared: <strong>${MathEngine.formatPaisa(ledger.paidShared)}</strong></div>
-              <div>Cost of shares: <strong>${MathEngine.formatPaisa(ledger.shareCost)}</strong></div>
-              <div>Direct sent: <strong>${MathEngine.formatPaisa(ledger.paySent)}</strong></div>
-              <div>Direct received: <strong>${MathEngine.formatPaisa(ledger.payReceived)}</strong></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderEntries() {
-      const container = document.getElementById('entries-list-container');
-      let filtered = AppState.entries.filter(e => !e.isDeleted);
-
-      if (AppState.filterType !== 'all') {
-        filtered = filtered.filter(e => e.type === AppState.filterType);
-      }
-
-      if (AppState.filterCategory !== 'all') {
-        filtered = filtered.filter(e => (e.category || 'Other') === AppState.filterCategory);
-      }
-
-      if (AppState.filterRoommate !== 'all') {
-        const p = AppState.filterRoommate;
-        filtered = filtered.filter(e => {
-          if (e.type === 'share') return e.payer === p || (e.sharers && e.sharers.includes(p));
-          if (e.type === 'pay') return e.from === p || e.to === p;
-          return false;
-        });
-      }
-
-      if (AppState.searchQuery) {
-        const q = AppState.searchQuery.toLowerCase();
-        filtered = filtered.filter(e => {
-          return (e.desc || '').toLowerCase().includes(q) ||
-                 (e.payer || '').toLowerCase().includes(q) ||
-                 (e.from || '').toLowerCase().includes(q) ||
-                 (e.to || '').toLowerCase().includes(q) ||
-                 (e.category || '').toLowerCase().includes(q);
-        });
-      }
-
-      filtered.sort((a, b) => b.date.localeCompare(a.date));
-      document.getElementById('entries-count-badge').textContent = `${filtered.length} Entries`;
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">🔍</div>
-            <strong>No transactions found</strong>
-            <span style="font-size: 0.8rem;">Try clearing your search query or filters.</span>
-          </div>
-        `;
-        return;
-      }
-
-      const categoryIcons = {
-        'Groceries': '🛒',
-        'Electricity': '⚡',
-        'Rent': '🏠',
-        'Food': '🍲',
-        'Internet': '📶',
-        'Water': '💧',
-        'Settlement': '🤝',
-        'Other': '📦'
-      };
-
-      container.innerHTML = filtered.map(e => {
-        const isShare = e.type === 'share';
-        const icon = categoryIcons[e.category] || (isShare ? '🛒' : '🤝');
-        const detail = isShare 
-          ? `<span>Paid by <strong>${escapeHTML(e.payer)}</strong></span> • <span>${(e.sharers||[]).length} sharers</span>`
-          : `<span><strong>${escapeHTML(e.from)}</strong> paid <strong>${escapeHTML(e.to)}</strong></span>`;
-
-        return `
-          <div class="entry-card">
-            <div class="entry-left">
-              <div class="entry-icon-box" style="background: var(--bg-card-subtle);">${icon}</div>
-              <div class="entry-info">
-                <div class="entry-title">${escapeHTML(e.desc)}</div>
-                <div class="entry-meta">
-                  <span class="badge badge-teal" style="font-size: 0.68rem;">${e.category || 'General'}</span>
-                  <span>${e.date}</span>
-                  <span>•</span>
-                  ${detail}
-                  ${e.by ? `<span style="color: var(--teal-primary);">by ${escapeHTML(e.by)}</span>` : ''}
-                </div>
-              </div>
-            </div>
-
-            <div class="entry-right">
-              <div class="entry-amount">${MathEngine.formatPaisa(e.amount)}</div>
-              <div class="entry-actions">
-                <button class="entry-action-btn" onclick="startEditEntry('${e.id}')" title="Edit">✏️</button>
-                <button class="entry-action-btn btn-del" onclick="softDeleteEntry('${e.id}')" title="Delete & Move to Audit History">🗑️</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    /* 10. SOFT DELETE & AUDIT TRAIL LOGIC */
-    function softDeleteEntry(id) {
-      const entry = AppState.entries.find(e => String(e.id) === String(id));
-      if (!entry) return;
-
-      if (!confirm(`Move "${entry.desc}" (Rs. ${(entry.amount/100).toFixed(2)}) to Deletion History?`)) return;
-
-      entry.isDeleted = true;
-      const auditRecord = {
-        ...entry,
-        deletedAt: new Date().toISOString(),
-        deletedBy: AppState.currentUser ? AppState.currentUser.name : 'Unknown User'
-      };
-
-      AppState.deletedEntries.unshift(auditRecord);
-      saveState();
-      renderDashboard();
-      renderEntries();
-      showToast(`Moved "${entry.desc}" to Audit History`);
-    }
-
-    function restoreEntry(id) {
-      const entry = AppState.entries.find(e => String(e.id) === String(id));
-      if (entry) {
-        entry.isDeleted = false;
-      }
-      AppState.deletedEntries = AppState.deletedEntries.filter(e => String(e.id) !== String(id));
-      saveState();
-      renderAuditHistoryModal();
-      renderDashboard();
-      renderEntries();
-      showToast('Restored transaction to active ledger!');
-    }
-
-    function renderAuditHistoryModal() {
-      const container = document.getElementById('audit-history-content');
-      if (AppState.deletedEntries.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">✓</div>
-            <strong>Audit Log Clean</strong>
-            <span style="font-size: 0.8rem;">No deleted entries. Your ledger has 100% active integrity.</span>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Deleted By</th>
-                <th>Deleted At</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${AppState.deletedEntries.map(d => `
-                <tr>
-                  <td>${d.date}</td>
-                  <td><strong>${escapeHTML(d.desc)}</strong></td>
-                  <td>${MathEngine.formatPaisa(d.amount)}</td>
-                  <td><span class="badge badge-rose">${escapeHTML(d.deletedBy)}</span></td>
-                  <td style="font-size: 0.72rem; color: var(--text-muted);">${new Date(d.deletedAt).toLocaleString('en-PK')}</td>
-                  <td>
-                    <button class="btn btn-emerald btn-sm" onclick="restoreEntry('${d.id}')">Restore</button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    /* 11. QUICK SETTLE MODAL */
-    function openQuickSettleModal(debtor, creditor, amountPaisa) {
-      document.getElementById('settle-from-name').textContent = debtor;
-      document.getElementById('settle-from-avatar').textContent = debtor.charAt(0);
-      document.getElementById('settle-to-name').textContent = creditor;
-      document.getElementById('settle-to-avatar').textContent = creditor.charAt(0);
-      document.getElementById('settle-input-amount').value = (amountPaisa / 100).toFixed(2);
-      document.getElementById('settle-input-date').value = new Date().toISOString().split('T')[0];
-      document.getElementById('modal-settle-up').classList.add('open');
-    }
-
-    /* 12. ADD & SPLIT HANDLERS */
-    function renderSharersFormInputs() {
-      const container = document.getElementById('sharers-inputs-container');
-      const mode = AppState.splitMode;
-      const totalAmount = parseFloat(document.getElementById('input-amount').value) || 0;
-
-      container.innerHTML = AppState.roommates.map(p => {
-        let extraInput = '';
-        if (mode === 'exact') {
-          extraInput = `<input type="number" step="any" min="0" class="custom-split-input custom-val" data-person="${escapeHTML(p)}" placeholder="0.00">`;
-        } else if (mode === 'shares') {
-          extraInput = `<input type="number" step="1" min="1" value="1" class="custom-split-input custom-val" data-person="${escapeHTML(p)}"> <span style="font-size: 0.75rem;">share(s)</span>`;
-        } else if (mode === 'percent') {
-          const defaultPct = (100 / AppState.roommates.length).toFixed(1);
-          extraInput = `<input type="number" step="any" min="0" max="100" value="${defaultPct}" class="custom-split-input custom-val" data-person="${escapeHTML(p)}"> %`;
-        }
-
-        return `
-          <div class="custom-split-row">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-              <input type="checkbox" class="chk-sharer" value="${escapeHTML(p)}" checked>
-              <strong>${escapeHTML(p)}</strong>
-            </label>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              ${extraInput}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      container.querySelectorAll('input').forEach(i => i.addEventListener('input', updateSplitPreview));
-      updateSplitPreview();
-    }
-
-    function updateSplitPreview() {
-      const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('input-amount').value);
-      document.getElementById('paisa-preview').textContent = `${amtPaisa.toLocaleString()} paisa`;
-
-      const checkedSharers = [];
-      const customVals = {};
-      document.querySelectorAll('.chk-sharer:checked').forEach(c => {
-        const person = c.value;
-        checkedSharers.push(person);
-        const input = document.querySelector(`.custom-val[data-person="${person}"]`);
-        if (input) customVals[person] = input.value;
-      });
-
-      if (amtPaisa <= 0 || checkedSharers.length === 0) {
-        document.getElementById('preview-shares-detail').textContent = 'Enter an amount and choose flatmates to preview split.';
-        return;
-      }
-
-      const shares = MathEngine.calculateSplitShares(amtPaisa, checkedSharers, AppState.splitMode, customVals);
-      let detailsHtml = checkedSharers.map(p => `<strong>${escapeHTML(p)}</strong>: ${MathEngine.formatPaisa(shares[p])}`).join(' • ');
-      document.getElementById('preview-shares-detail').innerHTML = detailsHtml;
-    }
-
-    /* 13. EDIT ENTRY */
-    function startEditEntry(id) {
-      const entry = AppState.entries.find(e => String(e.id) === String(id));
-      if (!entry) return;
-
-      AppState.editingEntryId = entry.id;
-      document.getElementById('entry-edit-id').value = entry.id;
-      document.getElementById('input-amount').value = (entry.amount / 100).toFixed(2);
-      document.getElementById('input-date').value = entry.date;
-      document.getElementById('input-desc').value = entry.desc;
-      document.getElementById('select-category').value = entry.category || 'Other';
-
-      document.getElementById('form-heading').innerHTML = `✏️ Edit Transaction`;
-      document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
-
-      if (entry.type === 'share') {
-        setTransactionType('share');
-        document.getElementById('select-payer').value = entry.payer;
-      } else {
-        setTransactionType('pay');
-        document.getElementById('select-pay-from').value = entry.from;
-        document.getElementById('select-pay-to').value = entry.to;
-      }
-
-      switchTab('add');
-    }
-
-    function resetForm() {
-      AppState.editingEntryId = null;
-      document.getElementById('entry-edit-id').value = '';
-      document.getElementById('transaction-form').reset();
-      document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
-      document.getElementById('form-heading').innerHTML = `Add New Transaction`;
-      document.getElementById('btn-cancel-edit').style.display = 'none';
-      setTransactionType('share');
-      renderSharersFormInputs();
-    }
-
-    function setTransactionType(type) {
-      if (type === 'share') {
-        document.getElementById('btn-type-share').className = 'btn btn-primary';
-        document.getElementById('btn-type-pay').className = 'btn btn-secondary';
-        document.getElementById('fields-share').style.display = 'block';
-        document.getElementById('fields-pay').style.display = 'none';
-      } else {
-        document.getElementById('btn-type-share').className = 'btn btn-secondary';
-        document.getElementById('btn-type-pay').className = 'btn btn-primary';
-        document.getElementById('fields-share').style.display = 'none';
-        document.getElementById('fields-pay').style.display = 'block';
-      }
-    }
-
-    /* 14. INITIALIZATION & EVENT ATTACHMENTS */
-    function init() {
-      loadState();
-
-      // Service Worker Registration for PWA
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW failed:', e));
-      }
-
-      // Update User Badge
-      updateAuthUI();
-
-      // Navigation
-      document.querySelectorAll('.nav-tab').forEach(t => {
-        t.addEventListener('click', () => switchTab(t.dataset.tab));
-      });
-      document.getElementById('fab-add-trans').addEventListener('click', () => {
-        resetForm();
-        switchTab('add');
-      });
-      document.getElementById('btn-brand-home').addEventListener('click', () => switchTab('dashboard'));
-
-      // Auth Modal Triggers
-      document.getElementById('btn-user-auth').addEventListener('click', () => {
-        renderQuickProfilesList();
-        document.getElementById('modal-auth').classList.add('open');
-      });
-
-      // Audit Modal Trigger
-      document.getElementById('btn-open-audit').addEventListener('click', () => {
-        renderAuditHistoryModal();
-        document.getElementById('modal-audit').classList.add('open');
-      });
-
-      // Close Modals
-      document.querySelectorAll('.btn-close-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
-        });
-      });
-
-      // Cycle Filter
-      populateCycleDropdown();
-      document.getElementById('cycle-select').addEventListener('change', (e) => {
-        AppState.selectedCycle = e.target.value;
-        renderDashboard();
-      });
-
-      // CSV Export Buttons
-      const runCSVExport = () => CSVExporter.exportLedger(AppState.entries, AppState.roomId);
-      document.getElementById('btn-export-csv').addEventListener('click', runCSVExport);
-      document.getElementById('btn-settings-export-csv').addEventListener('click', runCSVExport);
-
-      // WhatsApp Exporter Modal
-      document.getElementById('btn-dash-whatsapp').addEventListener('click', openWhatsAppSummary);
-      document.getElementById('btn-copy-whatsapp').addEventListener('click', () => {
-        const text = document.getElementById('whatsapp-preview-content').textContent;
-        navigator.clipboard.writeText(text).then(() => showToast('Copied WhatsApp summary!'));
-      });
-
-      // Ledger Filters
-      document.getElementById('filter-search').addEventListener('input', (e) => {
-        AppState.searchQuery = e.target.value;
-        renderEntries();
-      });
-
-      document.querySelectorAll('#view-entries .chip-btn[data-type]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('#view-entries .chip-btn[data-type]').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          AppState.filterType = btn.dataset.type;
-          renderEntries();
-        });
-      });
-
-      document.getElementById('filter-category').addEventListener('change', (e) => {
-        AppState.filterCategory = e.target.value;
-        renderEntries();
-      });
-
-      document.getElementById('filter-roommate').addEventListener('change', (e) => {
-        AppState.filterRoommate = e.target.value;
-        renderEntries();
-      });
-
-      // Add/Edit Form Handlers
-      document.getElementById('btn-type-share').addEventListener('click', () => setTransactionType('share'));
-      document.getElementById('btn-type-pay').addEventListener('click', () => setTransactionType('pay'));
-      document.getElementById('input-amount').addEventListener('input', updateSplitPreview);
-
-      // Preset Chips in Add
-      document.querySelectorAll('.preset-chips .chip-btn[data-amt]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const cur = parseFloat(document.getElementById('input-amount').value) || 0;
-          document.getElementById('input-amount').value = (cur + parseFloat(btn.dataset.amt)).toFixed(2);
-          updateSplitPreview();
-        });
-      });
-
-      document.querySelectorAll('.preset-chips .chip-btn[data-desc]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.getElementById('input-desc').value = btn.dataset.desc;
-        });
-      });
-
-      // Split Mode Tabs
-      document.querySelectorAll('.split-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          AppState.splitMode = tab.dataset.split;
-          renderSharersFormInputs();
-        });
-      });
-
-      document.getElementById('btn-select-all-sharers').addEventListener('click', () => {
-        document.querySelectorAll('.chk-sharer').forEach(c => c.checked = true);
-        updateSplitPreview();
-      });
-
-      document.getElementById('btn-clear-sharers').addEventListener('click', () => {
-        document.querySelectorAll('.chk-sharer').forEach(c => c.checked = false);
-        updateSplitPreview();
-      });
-
-      document.getElementById('btn-cancel-edit').addEventListener('click', resetForm);
-
-      // Submit Transaction Form
-      document.getElementById('transaction-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const type = document.getElementById('btn-type-share').classList.contains('btn-primary') ? 'share' : 'pay';
-        const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('input-amount').value);
-        const date = document.getElementById('input-date').value;
-        const desc = document.getElementById('input-desc').value.trim();
-        const category = document.getElementById('select-category').value;
-
-        if (amtPaisa <= 0) {
-          alert('Amount must be positive.');
-          return;
-        }
-
-        let entry = null;
-
-        if (type === 'share') {
-          const payer = document.getElementById('select-payer').value;
-          const sharers = [];
-          const customVals = {};
-          document.querySelectorAll('.chk-sharer:checked').forEach(c => {
-            sharers.push(c.value);
-            const input = document.querySelector(`.custom-val[data-person="${c.value}"]`);
-            if (input) customVals[c.value] = input.value;
-          });
-
-          if (sharers.length === 0) {
-            alert('Select at least one flatmate to split with.');
-            return;
-          }
-
-          const shares = MathEngine.calculateSplitShares(amtPaisa, sharers, AppState.splitMode, customVals);
-
-          entry = {
-            id: AppState.editingEntryId || `trans_${Date.now()}`,
-            type: 'share',
-            category,
-            desc,
-            amount: amtPaisa,
-            date,
-            payer,
-            sharers,
-            splitMode: AppState.splitMode,
-            customValues: customVals,
-            shares,
-            by: AppState.currentUser ? AppState.currentUser.name : payer,
-            isDeleted: false
-          };
-        } else {
-          const from = document.getElementById('select-pay-from').value;
-          const to = document.getElementById('select-pay-to').value;
-          if (from === to) {
-            alert('Payer and receiver cannot be the same person.');
-            return;
-          }
-
-          entry = {
-            id: AppState.editingEntryId || `trans_${Date.now()}`,
-            type: 'pay',
-            category: 'Settlement',
-            desc,
-            amount: amtPaisa,
-            date,
-            from,
-            to,
-            by: AppState.currentUser ? AppState.currentUser.name : from,
-            isDeleted: false
-          };
-        }
-
-        if (AppState.editingEntryId) {
-          const idx = AppState.entries.findIndex(x => String(x.id) === String(AppState.editingEntryId));
-          if (idx !== -1) AppState.entries[idx] = entry;
-          showToast('Updated transaction!');
-        } else {
-          AppState.entries.unshift(entry);
-          showToast('Recorded new transaction!');
-        }
-
-        saveState();
-        resetForm();
-        populateCycleDropdown();
-        renderDashboard();
-        renderEntries();
-        switchTab('dashboard');
-      });
-
-      // Quick Settle Dialog Form Submit
-      document.getElementById('form-quick-settle').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const debtor = document.getElementById('settle-from-name').textContent;
-        const creditor = document.getElementById('settle-to-name').textContent;
-        const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('settle-input-amount').value);
-        const method = document.getElementById('settle-payment-method').value;
-        const date = document.getElementById('settle-input-date').value;
-
-        const newEntry = {
-          id: `settle_${Date.now()}`,
-          type: 'pay',
-          category: 'Settlement',
-          desc: `Settlement (${method}): ${debtor} to ${creditor}`,
-          amount: amtPaisa,
-          date,
-          from: debtor,
-          to: creditor,
-          by: AppState.currentUser ? AppState.currentUser.name : debtor,
-          isDeleted: false
-        };
-
-        AppState.entries.unshift(newEntry);
-        saveState();
-        document.getElementById('modal-settle-up').classList.remove('open');
-        renderDashboard();
-        renderEntries();
-        showToast(`✓ Recorded settlement: ${debtor} paid ${creditor}!`);
-      });
-
-      // Auth Tabs & Form
-      document.getElementById('btn-auth-tab-login').addEventListener('click', () => setAuthMode('login'));
-      document.getElementById('btn-auth-tab-register').addEventListener('click', () => setAuthMode('register'));
-
-      document.getElementById('form-auth').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const isReg = document.getElementById('group-auth-name').style.display !== 'none';
-        const user = document.getElementById('auth-input-user').value;
-        const pass = document.getElementById('auth-input-pass').value;
-
-        try {
-          if (isReg) {
-            const name = document.getElementById('auth-input-name').value;
-            const newAcc = await AuthManager.register(name, user, pass);
-            if (!AppState.roommates.includes(name.trim())) {
-              AppState.roommates.push(name.trim());
-              saveState();
-            }
-            AppState.currentUser = newAcc;
-            showToast(`Account registered and logged in as ${name}!`);
-          } else {
-            const acc = await AuthManager.login(user, pass);
-            AppState.currentUser = acc;
-            showToast(`Welcome back, ${acc.name}!`);
-          }
-          updateAuthUI();
-          renderRoommatesUI();
-          renderDashboard();
-          document.getElementById('modal-auth').classList.remove('open');
-        } catch(err) {
-          alert(err.message);
-        }
-      });
-
-      // Add Flatmate Form
-      document.getElementById('add-roommate-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('input-new-roommate').value.trim();
-        if (!name) return;
-        if (AppState.roommates.some(r => r.toLowerCase() === name.toLowerCase())) {
-          alert('Flatmate already exists.');
-          return;
-        }
-        AppState.roommates.push(name);
-        saveState();
-        document.getElementById('input-new-roommate').value = '';
-        renderRoommatesUI();
-        renderDashboard();
-        showToast(`Added flatmate "${name}"`);
-      });
-
-      // Bulk Importer
-      document.getElementById('btn-load-sample-bulk').addEventListener('click', () => {
-        document.getElementById('bulk-textarea').value = BENCHMARK_ENTRIES.map(e => {
-          const r = (e.amount / 100).toFixed(0);
-          if (e.type === 'share') return `share | ${e.date} | ${e.desc} | ${r} | ${e.payer} | ${e.sharers.join(', ')}`;
-          return `pay | ${e.date} | ${e.desc} | ${r} | ${e.from} | ${e.to}`;
-        }).join('\n');
-      });
-
-      document.getElementById('btn-parse-bulk').addEventListener('click', parseBulkText);
-      document.getElementById('btn-commit-bulk').addEventListener('click', commitBulkEntries);
-
-      // JSON Export/Import & Reset
-      document.getElementById('btn-export-backup').addEventListener('click', () => {
-        const data = {
-          roomId: AppState.roomId,
-          roommates: AppState.roommates,
-          entries: AppState.entries,
-          deletedEntries: AppState.deletedEntries
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `roomates-sheet-${AppState.roomId}-backup.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      document.getElementById('file-import-backup').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const data = JSON.parse(evt.target.result);
-            if (Array.isArray(data.roommates) && Array.isArray(data.entries)) {
-              AppState.roommates = data.roommates;
-              AppState.entries = data.entries;
-              AppState.deletedEntries = data.deletedEntries || [];
-              saveState();
-              renderRoommatesUI();
-              renderDashboard();
-              renderEntries();
-              showToast('Restored backup successfully!');
-            }
-          } catch(err) {
-            alert('Invalid JSON backup file.');
-          }
-        };
-        reader.readAsText(file);
-      });
-
-      document.getElementById('btn-load-benchmark-preset').addEventListener('click', () => {
-        if (confirm('Reset to the official 20-entry benchmark dataset?')) {
-          AppState.roommates = [...BENCHMARK_ROOMMATES];
-          AppState.entries = JSON.parse(JSON.stringify(BENCHMARK_ENTRIES));
-          AppState.deletedEntries = [];
-          saveState();
-          populateCycleDropdown();
-          renderRoommatesUI();
-          renderDashboard();
-          renderEntries();
-          showToast('Loaded 100% Verified Benchmark Preset!');
-        }
-      });
-
-      // Theme toggle
-      document.getElementById('btn-toggle-theme').addEventListener('click', () => {
-        const cur = document.body.getAttribute('data-theme');
-        const next = cur === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', next);
-      });
-
-      // Initial Render
-      renderRoommatesUI();
-      renderDashboard();
-      renderEntries();
-      renderSharersFormInputs();
-    }
-
-    function populateCycleDropdown() {
-      const select = document.getElementById('cycle-select');
-      const cycles = new Set();
-      AppState.entries.forEach(e => {
-        if (e.date && e.date.length >= 7) {
-          cycles.add(e.date.substring(0, 7)); // e.g. "2026-10"
-        }
-      });
-
-      const sorted = Array.from(cycles).sort().reverse();
-      let html = `<option value="all">All Time (Full Cycle)</option>`;
-      sorted.forEach(c => {
-        const [year, month] = c.split('-');
-        const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
-        const name = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        html += `<option value="${c}">${name}</option>`;
-      });
-      select.innerHTML = html;
-      select.value = AppState.selectedCycle;
-    }
-
-    function setAuthMode(mode) {
-      if (mode === 'login') {
-        document.getElementById('btn-auth-tab-login').className = 'btn btn-primary';
-        document.getElementById('btn-auth-tab-register').className = 'btn btn-ghost';
-        document.getElementById('group-auth-name').style.display = 'none';
-        document.getElementById('auth-modal-title').textContent = 'Sign In to Your Account';
-        document.getElementById('btn-auth-submit').textContent = 'Sign In';
-      } else {
-        document.getElementById('btn-auth-tab-login').className = 'btn btn-ghost';
-        document.getElementById('btn-auth-tab-register').className = 'btn btn-primary';
-        document.getElementById('group-auth-name').style.display = 'flex';
-        document.getElementById('auth-modal-title').textContent = 'Create New Account';
-        document.getElementById('btn-auth-submit').textContent = 'Register & Join';
-      }
-    }
-
-    function updateAuthUI() {
-      if (AppState.currentUser) {
-        document.getElementById('header-user-avatar').textContent = AppState.currentUser.name.charAt(0).toUpperCase();
-        document.getElementById('header-user-name').textContent = AppState.currentUser.name;
-      }
-    }
-
-    function renderQuickProfilesList() {
-      const container = document.getElementById('quick-profiles-list');
-      const accounts = AuthManager.getAccounts();
-      container.innerHTML = accounts.map(a => {
-        const isCurrent = AppState.currentUser && AppState.currentUser.name === a.name;
-        return `
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;" onclick="quickSwitchUser('${escapeHTML(a.name)}')">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div class="avatar-sm" style="background: #0d9488;">${a.name.charAt(0)}</div>
-              <strong>${escapeHTML(a.name)}</strong>
-              ${isCurrent ? '<span style="font-size: 0.7rem; color: var(--teal-primary);">(Active)</span>' : ''}
-            </div>
-            <button class="btn btn-secondary btn-sm">Switch</button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function quickSwitchUser(name) {
-      const accounts = AuthManager.getAccounts();
-      const acc = accounts.find(a => a.name === name) || { id: `usr_${name}`, name, username: name.toLowerCase() };
-      AuthManager.setSession(acc);
-      AppState.currentUser = acc;
-      updateAuthUI();
-      renderDashboard();
-      document.getElementById('modal-auth').classList.remove('open');
-      showToast(`Switched active profile to ${name}!`);
-    }
-
-    function renderRoommatesUI() {
-      document.getElementById('roommates-active-badge').textContent = `${AppState.roommates.length} Flatmates`;
-
-      // Select Dropdowns
-      const options = AppState.roommates.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
-      document.getElementById('select-payer').innerHTML = options;
-      document.getElementById('select-pay-from').innerHTML = options;
-      document.getElementById('select-pay-to').innerHTML = options;
-      document.getElementById('filter-roommate').innerHTML = `<option value="all">All Roommates</option>` + options;
-
-      if (AppState.currentUser && AppState.roommates.includes(AppState.currentUser.name)) {
-        document.getElementById('select-payer').value = AppState.currentUser.name;
-        document.getElementById('select-pay-from').value = AppState.currentUser.name;
-      }
-
-      // Roommates Chips
-      document.getElementById('roommates-chips-container').innerHTML = AppState.roommates.map(p => `
-        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--bg-card-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); font-size: 0.85rem;">
-          <div class="avatar-sm" style="width: 20px; height: 20px; font-size: 0.7rem;">${p.charAt(0)}</div>
-          <span>${escapeHTML(p)}</span>
-          <button style="border: none; background: none; color: var(--rose-debt); cursor: pointer; font-size: 0.8rem; margin-left: 2px;" onclick="removeRoommate('${escapeHTML(p)}')">✕</button>
-        </div>
-      `).join('');
-    }
-
-    function removeRoommate(name) {
-      if (AppState.roommates.length <= 2) {
-        alert('A minimum of 2 roommates is required.');
-        return;
-      }
-      AppState.roommates = AppState.roommates.filter(r => r !== name);
-      saveState();
-      renderRoommatesUI();
-      renderDashboard();
-      showToast(`Removed "${name}"`);
-    }
-
-    function openWhatsAppSummary() {
-      const active = AppState.entries.filter(e => !e.isDeleted);
-      const { balances } = MathEngine.calculateBalances(AppState.roommates, active);
-      const settlements = MathEngine.calculateSettlements(balances);
-
-      let msg = `*Roomates Sheet Settlement (Room: ${AppState.roomId})* 🏠\n📅 ${new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
-      msg += `*Optimal Transfers (${settlements.length}):*\n`;
-      if (settlements.length === 0) {
-        msg += `🎉 All balances are settled up! Zero transfers needed.\n\n`;
-      } else {
-        settlements.forEach(s => {
-          msg += `👉 *${s.from}* pays *${s.to}*: ${MathEngine.formatPaisa(s.amount)}\n`;
-        });
-        msg += `\n`;
-      }
-
-      msg += `*Net Balances:*\n`;
-      for (const p of AppState.roommates) {
-        const bal = balances[p] || 0;
-        if (bal > 0) msg += `🟢 *${p}*: gets ${MathEngine.formatPaisa(bal)}\n`;
-        else if (bal < 0) msg += `🔴 *${p}*: owes ${MathEngine.formatPaisa(Math.abs(bal))}\n`;
-        else msg += `⚪ *${p}*: settled (Rs. 0.00)\n`;
-      }
-
-      msg += `\n_Generated with Roomates Sheet • Exact Paisa Math_`;
-      document.getElementById('whatsapp-preview-content').textContent = msg;
-      document.getElementById('btn-open-whatsapp-link').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-      document.getElementById('modal-whatsapp').classList.add('open');
-    }
-
-    let parsedBulkData = [];
-    function parseBulkText() {
-      const text = document.getElementById('bulk-textarea').value;
-      const lines = text.split('\n');
-      parsedBulkData = [];
-
-      lines.forEach(l => {
-        const parts = l.trim().split('|').map(s => s.trim());
-        if (parts.length >= 5) {
-          const type = parts[0].toLowerCase();
-          const date = parts[1];
-          const desc = parts[2];
-          const amt = MathEngine.rupeesToPaisa(parts[3]);
-
-          if (type === 'share' && parts.length >= 6) {
-            const payer = parts[4];
-            const sharers = parts[5].split(',').map(s => s.trim()).filter(Boolean);
-            parsedBulkData.push({ type: 'share', date, desc, amount: amt, payer, sharers, by: AppState.currentUser ? AppState.currentUser.name : payer });
-          } else if (type === 'pay' && parts.length >= 6) {
-            const from = parts[4];
-            const to = parts[5];
-            parsedBulkData.push({ type: 'pay', date, desc, amount: amt, from, to, by: AppState.currentUser ? AppState.currentUser.name : from });
-          }
-        }
-      });
-
-      document.getElementById('parsed-valid-count').textContent = parsedBulkData.length;
-      document.getElementById('bulk-preview-tbody').innerHTML = parsedBulkData.map(e => `
-        <tr>
-          <td><span class="badge ${e.type === 'share' ? 'badge-teal' : 'badge-amber'}">${e.type.toUpperCase()}</span></td>
-          <td>${e.date}</td>
-          <td><strong>${escapeHTML(e.desc)}</strong></td>
-          <td>${MathEngine.formatPaisa(e.amount)}</td>
-          <td>${e.type === 'share' ? `Payer: ${e.payer}` : `${e.from} ➔ ${e.to}`}</td>
-        </tr>
-      `).join('');
-
-      document.getElementById('bulk-preview-section').style.display = 'block';
-      showToast(`Parsed ${parsedBulkData.length} entries!`);
-    }
-
-    function commitBulkEntries() {
-      if (parsedBulkData.length === 0) return;
-      if (document.getElementById('chk-auto-add-people').checked) {
-        parsedBulkData.forEach(e => {
-          if (e.payer && !AppState.roommates.includes(e.payer)) AppState.roommates.push(e.payer);
-          if (e.from && !AppState.roommates.includes(e.from)) AppState.roommates.push(e.from);
-          if (e.to && !AppState.roommates.includes(e.to)) AppState.roommates.push(e.to);
-          if (e.sharers) e.sharers.forEach(s => { if (!AppState.roommates.includes(s)) AppState.roommates.push(s); });
-        });
-      }
-
-      parsedBulkData.forEach((e, idx) => {
-        AppState.entries.unshift({
-          ...e,
-          id: `bulk_${Date.now()}_${idx}`,
-          category: 'Other',
-          isDeleted: false
-        });
-      });
-
-      saveState();
-      populateCycleDropdown();
-      renderRoommatesUI();
-      renderDashboard();
-      renderEntries();
-      document.getElementById('bulk-textarea').value = '';
-      document.getElementById('bulk-preview-section').style.display = 'none';
-      switchTab('dashboard');
-      showToast(`Successfully committed ${parsedBulkData.length} entries!`);
-    }
-
     function escapeHTML(str) {
       if (!str) return '';
       return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => App.init());
   </script>
 </body>
 </html>
