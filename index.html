@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Roomates Sheet - Multi-Tenant Roommate Settlement App with Multi-User Authentication, Isolated Rooms, Universal Sorting, and Settle-to-Zero Cycles.">
+  <meta name="description" content="Roomates Sheet - Group Expense Settlement & Ledger with Multi-Device Cloud Sync, WhatsApp-style Rooms, and Exact Paisa Precision.">
   <meta name="theme-color" content="#0d9488">
-  <title>Roomates Sheet | Multi-Room Settlement & Ledger</title>
+  <title>Roomates Sheet | Shared Expense Settlement & Ledger</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,10 +54,6 @@
       --amber-badge: #d97706;
       --amber-bg: #fef3c7;
       --amber-text: #92400e;
-
-      --indigo-accent: #6366f1;
-      --indigo-bg: #e0e7ff;
-      --indigo-text: #3730a3;
 
       --radius-sm: 6px;
       --radius-md: 10px;
@@ -136,7 +132,7 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* Auth View Wrapper */
+    /* Auth Gate Screen */
     #view-auth-gate {
       min-height: 100vh;
       display: flex;
@@ -244,7 +240,6 @@
       gap: 8px;
     }
 
-    /* Room Badge Selector in Header */
     .btn-room-badge {
       display: inline-flex;
       align-items: center;
@@ -327,7 +322,6 @@
       padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 24px);
     }
 
-    /* Tab views */
     .tab-view {
       display: none;
       flex-direction: column;
@@ -335,16 +329,13 @@
       animation: fadeIn 0.2s ease-out;
     }
 
-    .tab-view.active {
-      display: flex;
-    }
+    .tab-view.active { display: flex; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Cards */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
@@ -390,9 +381,7 @@
       text-decoration: none;
     }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
+    .btn:active { transform: scale(0.97); }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--teal-primary), var(--cyan-accent));
@@ -422,9 +411,7 @@
       border-color: var(--border-subtle);
     }
 
-    .btn-secondary:hover {
-      background: var(--border-subtle);
-    }
+    .btn-secondary:hover { background: var(--border-subtle); }
 
     .btn-ghost {
       background: transparent;
@@ -454,7 +441,6 @@
     .badge-emerald { background: var(--emerald-bg); color: var(--emerald-text); }
     .badge-rose { background: var(--rose-bg); color: var(--rose-text); }
     .badge-teal { background: var(--teal-light); color: var(--teal-primary); }
-    .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
 
     /* Cycle Bar */
     .cycle-bar {
@@ -467,12 +453,6 @@
       padding: 12px 16px;
       gap: 12px;
       flex-wrap: wrap;
-    }
-
-    .cycle-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     /* Stats Grid */
@@ -639,7 +619,7 @@
       padding-top: 8px;
     }
 
-    /* Ledger & Deep Sorting/Filtering Bar */
+    /* Filter & Sort Panel */
     .filter-panel {
       background: var(--bg-card-subtle);
       border: 1px solid var(--border-subtle);
@@ -731,10 +711,7 @@
       font-size: 20px;
     }
 
-    .entry-info {
-      min-width: 0;
-      flex: 1;
-    }
+    .entry-info { min-width: 0; flex: 1; }
 
     .entry-title {
       font-weight: 600;
@@ -770,10 +747,7 @@
       color: var(--text-main);
     }
 
-    .entry-actions {
-      display: flex;
-      gap: 4px;
-    }
+    .entry-actions { display: flex; gap: 4px; }
 
     .entry-action-btn {
       background: none;
@@ -961,9 +935,7 @@
       transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .nav-tab.active {
-      color: var(--teal-primary);
-    }
+    .nav-tab.active { color: var(--teal-primary); }
 
     .nav-tab.active svg {
       transform: translateY(-2px) scale(1.1);
@@ -1070,7 +1042,6 @@
       background: var(--bg-card-subtle);
     }
 
-    /* Table */
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--border-subtle);
@@ -1097,7 +1068,6 @@
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    /* Toast */
     #toast-container {
       position: fixed;
       bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
@@ -1150,6 +1120,17 @@
       margin-bottom: 4px;
       font-size: 20px;
     }
+
+    /* WhatsApp Group Style Members List */
+    .member-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-card-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 6px;
+    }
   </style>
 </head>
 <body data-theme="system">
@@ -1167,7 +1148,6 @@
         </p>
       </div>
 
-      <!-- Auth Mode Tabs: Sign In vs Sign Up -->
       <div style="display: flex; gap: 8px; background: var(--bg-card-subtle); padding: 4px; border-radius: var(--radius-md);">
         <button class="btn btn-primary" id="btn-gate-tab-login" style="flex: 1; padding: 7px;">Sign In</button>
         <button class="btn btn-ghost" id="btn-gate-tab-register" style="flex: 1; padding: 7px;">Create Account</button>
@@ -1176,12 +1156,12 @@
       <form id="form-gate-auth" style="display: flex; flex-direction: column; gap: 14px;">
         <div class="form-group" id="gate-group-name" style="display: none;">
           <label class="form-label" for="gate-input-name">Full Name</label>
-          <input type="text" id="gate-input-name" class="form-input" placeholder="e.g. Sanaullah Khan">
+          <input type="text" id="gate-input-name" class="form-input" placeholder="e.g. Alex Johnson">
         </div>
 
         <div class="form-group">
           <label class="form-label" for="gate-input-user">Username or Email</label>
-          <input type="text" id="gate-input-user" class="form-input" placeholder="e.g. sanaullah or sana@mail.com" required>
+          <input type="text" id="gate-input-user" class="form-input" placeholder="e.g. user@example.com or alex" required>
         </div>
 
         <div class="form-group">
@@ -1208,7 +1188,7 @@
           <div class="brand-logo">₨</div>
           <div class="brand-text">
             <h1>Roomates Sheet</h1>
-            <span id="header-room-subtitle">Loading room...</span>
+            <span id="header-room-subtitle">Loading flat...</span>
           </div>
         </div>
 
@@ -1243,13 +1223,13 @@
 
         <!-- Active Cycle & Settle-to-Zero Action Bar -->
         <div class="cycle-bar">
-          <div class="cycle-info">
+          <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">ACTIVE CYCLE:</span>
-            <strong id="active-cycle-name" style="font-family: var(--font-display); color: var(--teal-primary);">Current Cycle</strong>
+            <strong id="active-cycle-name" style="font-family: var(--font-display); color: var(--teal-primary);">Current Period</strong>
+            <span id="room-mute-indicator" style="display: none; font-size: 0.75rem;" title="Room notifications are muted">🔕</span>
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <!-- Settle-to-Zero & Start Fresh Cycle Button -->
             <button class="btn btn-rose btn-sm" id="btn-close-cycle" title="Archive current period and reset active balances to zero">
               🔄 Settle All & Start Fresh
             </button>
@@ -1279,13 +1259,13 @@
           <div class="stat-card">
             <div class="stat-label">Settlement Transfers</div>
             <div class="stat-val" id="stat-transfers-count" style="color: var(--teal-primary);">0</div>
-            <div class="stat-sub">Optimal greedy paths</div>
+            <div class="stat-sub">Optimal cash paths</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-label">Roommates</div>
+            <div class="stat-label">Roommates in Flat</div>
             <div class="stat-val" id="stat-roommates-count">0</div>
-            <div class="stat-sub" id="stat-room-code-tag">Code: FLAT-402</div>
+            <div class="stat-sub" id="stat-room-code-tag">Code: FLAT-101</div>
           </div>
         </section>
 
@@ -1352,7 +1332,6 @@
 
           <!-- Deep Universal Filter & Sort Panel -->
           <div class="filter-panel">
-            <!-- Row 1: Search & Sorting -->
             <div class="filter-row">
               <input type="text" id="filter-search" class="form-input" style="max-width: 320px;" placeholder="🔍 Search description, person, amount...">
 
@@ -1369,7 +1348,6 @@
               </div>
             </div>
 
-            <!-- Row 2: Type Filters -->
             <div class="filter-row">
               <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">TYPE:</span>
@@ -1378,7 +1356,6 @@
                 <button class="chip-btn" data-filter-type="pay">Direct Cash</button>
               </div>
 
-              <!-- Select All / Clear All Categories -->
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">CATEGORY:</span>
                 <select id="filter-category" class="select-dropdown">
@@ -1400,7 +1377,6 @@
             </div>
           </div>
 
-          <!-- Transactions Container -->
           <div style="display: flex; flex-direction: column; gap: 8px;" id="entries-list-container"></div>
         </section>
       </div>
@@ -1415,7 +1391,6 @@
             <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-edit" style="display: none;">Cancel Edit</button>
           </div>
 
-          <!-- Type Selector: Shared Expense vs Direct Cash -->
           <div style="display: flex; gap: 8px; margin-bottom: 16px;">
             <button type="button" class="btn btn-primary" id="btn-type-share" style="flex: 1;">Shared Expense</button>
             <button type="button" class="btn btn-secondary" id="btn-type-pay" style="flex: 1;">Direct Payment</button>
@@ -1424,7 +1399,6 @@
           <form id="transaction-form">
             <input type="hidden" id="entry-edit-id" value="">
 
-            <!-- Amount Input -->
             <div class="form-group">
               <label class="form-label">
                 Amount
@@ -1443,7 +1417,6 @@
               </div>
             </div>
 
-            <!-- Date & Category -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div class="form-group">
                 <label class="form-label" for="input-date">Date</label>
@@ -1465,13 +1438,11 @@
               </div>
             </div>
 
-            <!-- Description -->
             <div class="form-group">
               <label class="form-label" for="input-desc">Description</label>
               <input type="text" id="input-desc" class="form-input" placeholder="e.g. Grocery items, Dinner, Electricity bill" required>
             </div>
 
-            <!-- Quick Description Presets -->
             <div class="preset-chips" style="margin-top: -6px; margin-bottom: 16px;">
               <button type="button" class="chip-btn" data-desc="Groceries">🛒 Groceries</button>
               <button type="button" class="chip-btn" data-desc="Dinner / Food">🍲 Dinner</button>
@@ -1480,14 +1451,12 @@
               <button type="button" class="chip-btn" data-desc="Water Bottles">💧 Water</button>
             </div>
 
-            <!-- SHARED FIELDS -->
             <div id="fields-share">
               <div class="form-group">
                 <label class="form-label" for="select-payer">Who Paid?</label>
                 <select id="select-payer" class="form-select"></select>
               </div>
 
-              <!-- Split Mode Selector -->
               <div class="form-group">
                 <label class="form-label">Split Method</label>
                 <div class="split-mode-tabs">
@@ -1498,7 +1467,6 @@
                 </div>
               </div>
 
-              <!-- Sharers List with Inputs -->
               <div class="form-group">
                 <div class="form-label">
                   <span>Split With Flatmates</span>
@@ -1510,7 +1478,6 @@
                 <div id="sharers-inputs-container"></div>
               </div>
 
-              <!-- Live Split Verification Box -->
               <div class="card" style="background: var(--bg-card-subtle); padding: 12px; margin-bottom: 16px;">
                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
                   <span>Exact Split Preview</span>
@@ -1520,7 +1487,6 @@
               </div>
             </div>
 
-            <!-- DIRECT PAYMENT FIELDS -->
             <div id="fields-pay" style="display: none;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div class="form-group">
@@ -1542,43 +1508,70 @@
         </section>
       </div>
 
-      <!-- TAB 4: ROOM & FLATMATES SETTINGS -->
+      <!-- TAB 4: WHATSAPP-STYLE GROUP & ROOM SETTINGS -->
       <div class="tab-view" id="view-roommates">
-        <!-- Room Details & Invite Link -->
+
+        <!-- Group Info (Like WhatsApp Group Details) -->
         <section class="card">
           <div class="card-header">
             <div class="card-title">
-              🏠 Room Information & Invite Link
+              🏠 Flat Information & Link
             </div>
-            <span class="badge badge-teal" id="room-code-display">FLAT-402</span>
+            <span class="badge badge-teal" id="room-code-display">FLAT-101</span>
           </div>
 
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
-            Flatmates can join your room directly using this link or room code after signing up:
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            Share this link or code with your flatmates. When they sign up on their phones, they will automatically join this room!
           </p>
 
-          <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
             <input type="text" id="input-invite-link" class="form-input" style="flex: 1; min-width: 240px;" readonly>
             <button class="btn btn-secondary" id="btn-copy-invite-link">Copy Link</button>
             <button class="btn btn-emerald" id="btn-share-invite-whatsapp">WhatsApp Invite</button>
           </div>
+
+          <!-- Mute Notifications Toggle -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-card-subtle); border-radius: var(--radius-md);">
+            <div>
+              <strong>Mute Room Alerts</strong>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Silence toast notifications for this flat on this device.</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btn-toggle-mute-room">
+              <span id="mute-room-status-text">Mute Room 🔕</span>
+            </button>
+          </div>
         </section>
 
-        <!-- Roommates List -->
+        <!-- WhatsApp Group Style Members List -->
         <section class="card">
           <div class="card-header">
             <div class="card-title">
-              👥 Flatmate Members
+              👥 Flatmate Members (<span id="roommates-active-count">0</span>)
             </div>
-            <span class="badge badge-teal" id="roommates-active-badge">0 Flatmates</span>
+            <span class="badge badge-teal">Live Cloud Synced</span>
           </div>
 
           <form id="add-roommate-form" style="display: flex; gap: 8px; margin-bottom: 16px;">
-            <input type="text" id="input-new-roommate" class="form-input" placeholder="Add flatmate by name (e.g. Usman)" required>
-            <button type="submit" class="btn btn-primary" style="flex-shrink: 0;">Add to Room</button>
+            <input type="text" id="input-new-roommate" class="form-input" placeholder="Add flatmate by name (e.g. Jordan)" required>
+            <button type="submit" class="btn btn-primary" style="flex-shrink: 0;">Add Flatmate</button>
           </form>
 
-          <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="roommates-chips-container"></div>
+          <div id="roommates-group-list"></div>
+        </section>
+
+        <!-- Leave Room (Like WhatsApp Leave Group) -->
+        <section class="card" style="border-color: rgba(244, 63, 94, 0.3);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <strong style="color: var(--rose-debt);">Leave This Flat</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                You will be removed from this flat's member list (just like leaving a WhatsApp group).
+              </div>
+            </div>
+            <button class="btn btn-rose btn-sm" id="btn-leave-room">
+              🚪 Leave Room
+            </button>
+          </div>
         </section>
 
         <!-- Data & CSV Export -->
@@ -1627,7 +1620,7 @@
 
         <button class="nav-tab" data-tab="roommates">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Room Settings</span>
+          <span>Group Info</span>
         </button>
       </div>
     </nav>
@@ -1641,30 +1634,32 @@
   <div class="modal-backdrop" id="modal-room-manager">
     <div class="modal-window">
       <div class="modal-header">
-        <h3 class="modal-title">My Rooms & Flats</h3>
+        <h3 class="modal-title">My Flats & Rooms</h3>
         <button class="icon-btn btn-close-modal">✕</button>
       </div>
       <div class="modal-body">
-        <!-- List of User's Current Rooms -->
-        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Your Rooms</span>
+        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Your Active Flats</span>
         <div id="user-rooms-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;"></div>
 
-        <!-- Join Room Form -->
+        <!-- Join Room Form (Searches Cloud & Local) -->
         <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 10px;">
-          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Join Room by Code</h4>
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Join Flat by Code</h4>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">
+            Enter the code your flatmate gave you (e.g. <code>FLAT-101</code>). It will connect across all devices.
+          </p>
           <form id="form-join-room" style="display: flex; gap: 8px;">
-            <input type="text" id="input-join-code" class="form-input" placeholder="e.g. FLAT-402" style="text-transform: uppercase;" required>
-            <button type="submit" class="btn btn-secondary" style="flex-shrink: 0;">Join Room</button>
+            <input type="text" id="input-join-code" class="form-input" placeholder="e.g. FLAT-101" style="text-transform: uppercase;" required>
+            <button type="submit" class="btn btn-secondary" id="btn-submit-join-room" style="flex-shrink: 0;">Join Flat</button>
           </form>
         </div>
 
         <!-- Create New Room Form -->
         <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 10px;">
-          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Create a New Room / Flat</h4>
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Create a New Flat</h4>
           <form id="form-create-room" style="display: flex; flex-direction: column; gap: 10px;">
-            <input type="text" id="input-new-room-name" class="form-input" placeholder="Flat Name (e.g. G11 Flat 402)" required>
-            <input type="text" id="input-new-room-code" class="form-input" placeholder="Custom Room Code (e.g. FLAT-402)" style="text-transform: uppercase;">
-            <button type="submit" class="btn btn-primary">Create New Room</button>
+            <input type="text" id="input-new-room-name" class="form-input" placeholder="Flat Name (e.g. Flat 101)" required>
+            <input type="text" id="input-new-room-code" class="form-input" placeholder="Custom Room Code (e.g. FLAT-101)" style="text-transform: uppercase;">
+            <button type="submit" class="btn btn-primary" id="btn-submit-create-room">Create New Flat</button>
           </form>
         </div>
       </div>
@@ -1976,6 +1971,54 @@
       }
     };
 
+    /* CLOUD SYNC BRIDGE (ALLOWS DIFFERENT PHONES TO SHARE & SYNC ROOMS) */
+    const CloudBridge = {
+      APP_KEY: 'rmsh2026',
+      BASE_URL: 'https://keyvalue.immanuel.co/api/KeyVal',
+
+      toBase64(str) {
+        return btoa(unescape(encodeURIComponent(str)))
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
+      },
+
+      fromBase64(b64) {
+        let padded = b64.replace(/-/g, '+').replace(/_/g, '/');
+        while (padded.length % 4) padded += '=';
+        return decodeURIComponent(escape(atob(padded)));
+      },
+
+      async pushRoom(room) {
+        try {
+          const payload = JSON.stringify(room);
+          const b64 = this.toBase64(payload);
+          const url = `${this.BASE_URL}/UpdateValue/${this.APP_KEY}/ROOM_${room.code}/${b64}`;
+          await fetch(url, { method: 'POST' });
+          return true;
+        } catch (e) {
+          console.warn('Cloud sync push error (offline?):', e);
+          return false;
+        }
+      },
+
+      async fetchRoom(code) {
+        try {
+          const cleanCode = code.trim().toUpperCase();
+          const url = `${this.BASE_URL}/GetValue/${this.APP_KEY}/ROOM_${cleanCode}`;
+          const res = await fetch(url);
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (!data || typeof data !== 'string') return null;
+          const jsonStr = this.fromBase64(data);
+          return JSON.parse(jsonStr);
+        } catch (e) {
+          console.warn('Cloud sync fetch error:', e);
+          return null;
+        }
+      }
+    };
+
     /* AUTHENTICATION & MULTI-USER MANAGER */
     const AuthManager = {
       KEY_USERS: 'roomates_users_v3',
@@ -1993,7 +2036,7 @@
           const raw = localStorage.getItem(this.KEY_USERS);
           if (raw) return JSON.parse(raw);
         } catch(e) {}
-        return []; // 100% clean zero dummy users!
+        return [];
       },
 
       saveUsers(users) {
@@ -2005,7 +2048,7 @@
           const raw = localStorage.getItem(this.KEY_SESSION);
           if (raw) return JSON.parse(raw);
         } catch(e) {}
-        return null; // Not logged in by default!
+        return null;
       },
 
       setSession(user) {
@@ -2026,6 +2069,7 @@
           username: u,
           passHash,
           rooms: [],
+          mutedRooms: [],
           createdAt: new Date().toISOString()
         };
         users.push(newUser);
@@ -2038,7 +2082,7 @@
         const users = this.getUsers();
         const u = username.trim().toLowerCase();
         const user = users.find(x => x.username === u || x.name.toLowerCase() === u);
-        if (!user) throw new Error('Account not found. Please register first.');
+        if (!user) throw new Error('Account not found. Please create an account first.');
         const passHash = await this.hashPassword(password);
         if (user.passHash !== passHash) {
           throw new Error('Incorrect password.');
@@ -2052,7 +2096,7 @@
       }
     };
 
-    /* MULTI-ROOM / FLAT MANAGER (COMPLETE ISOLATION) */
+    /* MULTI-ROOM & CLOUD MANAGER (WITH WHATSAPP GROUP FEATURES) */
     const RoomManager = {
       KEY_ROOMS: 'roomates_rooms_v3',
       KEY_ACTIVE_ROOM: 'roomates_active_room_v3',
@@ -2062,7 +2106,7 @@
           const raw = localStorage.getItem(this.KEY_ROOMS);
           if (raw) return JSON.parse(raw);
         } catch(e) {}
-        return {}; // 100% clean zero rooms by default!
+        return {};
       },
 
       saveRooms(rooms) {
@@ -2078,19 +2122,22 @@
         else localStorage.setItem(this.KEY_ACTIVE_ROOM, id);
       },
 
-      createRoom(name, customCode, adminUser) {
+      async createRoom(name, customCode, adminUser) {
         const rooms = this.getRooms();
         const code = (customCode || `ROOM-${Math.floor(1000 + Math.random()*9000)}`).trim().toUpperCase();
-        if (rooms[code]) throw new Error(`Room code "${code}" already exists.`);
+
+        // Check cloud first
+        const cloudExisting = await CloudBridge.fetchRoom(code);
+        if (rooms[code] || cloudExisting) throw new Error(`Room code "${code}" already exists. Please choose a different code.`);
 
         const newRoom = {
           id: code,
           name: name.trim(),
           code: code,
-          createdBy: adminUser.name,
+          adminUser: adminUser.name,
           createdAt: new Date().toISOString(),
           members: [adminUser.name],
-          activeCycle: "Current Cycle",
+          activeCycle: "Current Period",
           entries: [],
           deletedEntries: [],
           settledCycles: []
@@ -2100,7 +2147,7 @@
         this.saveRooms(rooms);
         this.setActiveRoomId(code);
 
-        // Add to user's rooms
+        // Save to user
         const users = AuthManager.getUsers();
         const user = users.find(u => u.id === adminUser.id);
         if (user) {
@@ -2110,23 +2157,35 @@
           AuthManager.setSession(user);
         }
 
+        // Push to cloud so other phones can join immediately
+        CloudBridge.pushRoom(newRoom);
         return newRoom;
       },
 
-      joinRoom(code, user) {
-        const rooms = this.getRooms();
+      async joinRoom(code, user) {
         const c = code.trim().toUpperCase();
-        if (!rooms[c]) throw new Error(`Room with code "${c}" does not exist.`);
+        const rooms = this.getRooms();
+        let room = rooms[c];
 
-        const room = rooms[c];
-        if (!room.members.includes(user.name)) {
-          room.members.push(user.name);
-          this.saveRooms(rooms);
+        // If not found locally, fetch from cloud!
+        if (!room) {
+          room = await CloudBridge.fetchRoom(c);
         }
 
+        if (!room) {
+          throw new Error(`Room "${c}" was not found. Please check the code or invite link.`);
+        }
+
+        // Add user as member if not already joined
+        if (!room.members.includes(user.name)) {
+          room.members.push(user.name);
+        }
+
+        rooms[c] = room;
+        this.saveRooms(rooms);
         this.setActiveRoomId(c);
 
-        // Add to user's rooms
+        // Update user's rooms list
         const users = AuthManager.getUsers();
         const u = users.find(x => x.id === user.id);
         if (u) {
@@ -2136,7 +2195,45 @@
           AuthManager.setSession(u);
         }
 
+        // Sync updated member list to cloud
+        CloudBridge.pushRoom(room);
         return room;
+      },
+
+      async leaveRoom(roomId, userName) {
+        const rooms = this.getRooms();
+        const room = rooms[roomId];
+        if (!room) return;
+
+        room.members = room.members.filter(m => m !== userName);
+        
+        // If room is now empty, delete it
+        if (room.members.length === 0) {
+          delete rooms[roomId];
+        } else {
+          // If the admin leaves, transfer admin role to the next member
+          if (room.adminUser === userName && room.members.length > 0) {
+            room.adminUser = room.members[0];
+          }
+          rooms[roomId] = room;
+          CloudBridge.pushRoom(room);
+        }
+
+        this.saveRooms(rooms);
+        this.setActiveRoomId(null);
+
+        // Remove from user's rooms
+        const user = AuthManager.getSession();
+        if (user && user.rooms) {
+          user.rooms = user.rooms.filter(r => r !== roomId);
+          AuthManager.setSession(user);
+          const users = AuthManager.getUsers();
+          const u = users.find(x => x.id === user.id);
+          if (u) {
+            u.rooms = user.rooms;
+            AuthManager.saveUsers(users);
+          }
+        }
       },
 
       closeCycleAndStartFresh(roomId, cycleName) {
@@ -2153,7 +2250,7 @@
 
         const archivedCycle = {
           id: `cycle_${Date.now()}`,
-          name: cycleName || `Cycle ending ${new Date().toLocaleDateString('en-PK')}`,
+          name: cycleName || `Period ending ${new Date().toLocaleDateString('en-PK')}`,
           closedAt: new Date().toISOString(),
           totalShared,
           entries: [...room.entries],
@@ -2167,9 +2264,10 @@
         // Reset active entries to completely fresh zero!
         room.entries = [];
         room.deletedEntries = [];
-        room.activeCycle = `Cycle started ${new Date().toLocaleDateString('en-PK')}`;
+        room.activeCycle = `Period started ${new Date().toLocaleDateString('en-PK')}`;
 
         this.saveRooms(rooms);
+        CloudBridge.pushRoom(room);
       }
     };
 
@@ -2222,21 +2320,22 @@
       sortBalancesBy: 'net-desc',
       editingEntryId: null,
 
-      init() {
-        // Register Service Worker for PWA
+      async init() {
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
 
-        // Check authentication
         this.user = AuthManager.getSession();
         if (!this.user) {
           this.showAuthGate();
         } else {
-          this.loadUserRoomsAndInit();
+          await this.loadUserRoomsAndInit();
         }
 
         this.bindEvents();
+
+        // Start background auto-sync check every 12 seconds
+        setInterval(() => this.backgroundCloudSyncCheck(), 12000);
       },
 
       showAuthGate() {
@@ -2244,29 +2343,83 @@
         document.getElementById('view-app-main').style.display = 'none';
       },
 
-      loadUserRoomsAndInit() {
+      async loadUserRoomsAndInit() {
         document.getElementById('view-auth-gate').style.display = 'none';
         document.getElementById('view-app-main').style.display = 'flex';
 
-        // Check if there is an active room
-        const activeId = RoomManager.getActiveRoomId();
-        const rooms = RoomManager.getRooms();
-
-        // Check URL room parameter for invitation (?room=XYZ)
         const urlParams = new URLSearchParams(window.location.search);
         const urlRoom = urlParams.get('room');
-        if (urlRoom && rooms[urlRoom.toUpperCase()]) {
-          RoomManager.joinRoom(urlRoom, this.user);
-          this.activeRoom = rooms[urlRoom.toUpperCase()];
-        } else if (activeId && rooms[activeId]) {
-          this.activeRoom = rooms[activeId];
-        } else {
-          // If no rooms exist or user has no room, open room modal
+
+        if (urlRoom) {
+          try {
+            const joined = await RoomManager.joinRoom(urlRoom, this.user);
+            this.activeRoom = joined;
+            showToast(`Connected to flat: ${joined.name}`);
+          } catch(e) {
+            console.warn(e);
+          }
+        }
+
+        if (!this.activeRoom) {
+          const activeId = RoomManager.getActiveRoomId();
+          const rooms = RoomManager.getRooms();
+          if (activeId && rooms[activeId]) {
+            this.activeRoom = rooms[activeId];
+          } else {
+            const roomKeys = Object.keys(rooms);
+            if (roomKeys.length > 0) {
+              this.activeRoom = rooms[roomKeys[0]];
+              RoomManager.setActiveRoomId(this.activeRoom.id);
+            }
+          }
+        }
+
+        if (!this.activeRoom) {
           this.openRoomModal();
           return;
         }
 
+        // Pull latest room state from cloud
+        await this.syncActiveRoomFromCloud();
         this.renderAll();
+      },
+
+      async syncActiveRoomFromCloud() {
+        if (!this.activeRoom) return;
+        const cloudData = await CloudBridge.fetchRoom(this.activeRoom.code);
+        if (cloudData) {
+          // Merge members
+          if (!cloudData.members.includes(this.user.name)) {
+            cloudData.members.push(this.user.name);
+          }
+          this.activeRoom = cloudData;
+          const rooms = RoomManager.getRooms();
+          rooms[this.activeRoom.id] = this.activeRoom;
+          RoomManager.saveRooms(rooms);
+        }
+      },
+
+      async backgroundCloudSyncCheck() {
+        if (!this.activeRoom || document.hidden) return;
+        const cloudData = await CloudBridge.fetchRoom(this.activeRoom.code);
+        if (cloudData) {
+          const localEntriesCount = (this.activeRoom.entries || []).length;
+          const cloudEntriesCount = (cloudData.entries || []).length;
+          if (cloudEntriesCount !== localEntriesCount || cloudData.members.length !== this.activeRoom.members.length) {
+            this.activeRoom = cloudData;
+            this.saveCurrentRoom();
+            this.renderDashboard();
+            this.renderEntries();
+            this.renderRoommatesUI();
+            if (!this.isRoomMuted()) {
+              showToast('⚡ Flat ledger synced with roommates!');
+            }
+          }
+        }
+      },
+
+      isRoomMuted() {
+        return this.user && this.user.mutedRooms && this.user.mutedRooms.includes(this.activeRoom.id);
       },
 
       renderAll() {
@@ -2275,17 +2428,22 @@
         // Header
         document.getElementById('header-user-avatar').textContent = this.user.name.charAt(0).toUpperCase();
         document.getElementById('header-user-name').textContent = this.user.name;
-        document.getElementById('header-room-subtitle').textContent = `Room: ${this.activeRoom.name}`;
+        document.getElementById('header-room-subtitle').textContent = `Flat: ${this.activeRoom.name}`;
         document.getElementById('header-room-badge-text').textContent = this.activeRoom.name;
         document.getElementById('stat-room-code-tag').textContent = `Code: ${this.activeRoom.code}`;
         document.getElementById('room-code-display').textContent = this.activeRoom.code;
+
+        // Mute status
+        const isMuted = this.isRoomMuted();
+        document.getElementById('room-mute-indicator').style.display = isMuted ? 'inline' : 'none';
+        document.getElementById('mute-room-status-text').textContent = isMuted ? 'Unmute Room 🔔' : 'Mute Room 🔕';
 
         // Share link
         const inviteUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(this.activeRoom.code)}`;
         document.getElementById('input-invite-link').value = inviteUrl;
 
         // Cycle Bar
-        document.getElementById('active-cycle-name').textContent = this.activeRoom.activeCycle || "Current Cycle";
+        document.getElementById('active-cycle-name').textContent = this.activeRoom.activeCycle || "Current Period";
 
         this.renderDashboard();
         this.renderEntries();
@@ -2295,11 +2453,10 @@
 
       renderDashboard() {
         const room = this.activeRoom;
-        const activeEntries = room.entries.filter(e => !e.isDeleted);
+        const activeEntries = (room.entries || []).filter(e => !e.isDeleted);
         const { balances, ledgers } = MathEngine.calculateBalances(room.members, activeEntries);
         const settlements = MathEngine.calculateSettlements(balances);
 
-        // Stats
         let totalShared = 0;
         let totalDirect = 0;
         let sharedCount = 0;
@@ -2326,13 +2483,8 @@
         document.getElementById('stat-roommates-count').textContent = room.members.length;
         document.getElementById('audit-badge-count').textContent = `Audit (${(room.deletedEntries || []).length})`;
 
-        // Analytics
         this.renderSpendingAnalytics(totalShared, catTotals);
-
-        // Settlements
         this.renderSettlements(settlements);
-
-        // Balances
         this.renderBalances(balances, ledgers);
       },
 
@@ -2423,7 +2575,6 @@
         const container = document.getElementById('balances-grid');
         let members = [...this.activeRoom.members];
 
-        // Sort Balances
         const sort = this.sortBalancesBy;
         members.sort((a, b) => {
           const balA = balances[a] || 0;
@@ -2439,7 +2590,7 @@
         });
 
         if (members.length === 0) {
-          container.innerHTML = `<div class="empty-state">No members in this flat yet. Add flatmates in Settings!</div>`;
+          container.innerHTML = `<div class="empty-state">No members in this flat yet. Add flatmates in Group Info!</div>`;
           return;
         }
 
@@ -2482,17 +2633,14 @@
         const container = document.getElementById('entries-list-container');
         let filtered = (this.activeRoom.entries || []).filter(e => !e.isDeleted);
 
-        // Filter Type
         if (this.filterType !== 'all') {
           filtered = filtered.filter(e => e.type === this.filterType);
         }
 
-        // Filter Category
         if (this.filterCategory !== 'all') {
           filtered = filtered.filter(e => (e.category || 'Other') === this.filterCategory);
         }
 
-        // Filter Roommate
         if (this.filterRoommate !== 'all') {
           const p = this.filterRoommate;
           filtered = filtered.filter(e => {
@@ -2502,7 +2650,6 @@
           });
         }
 
-        // Search Query
         if (this.searchQuery) {
           const q = this.searchQuery.toLowerCase();
           filtered = filtered.filter(e => {
@@ -2514,7 +2661,6 @@
           });
         }
 
-        // Deep Sorting
         const sort = this.sortEntriesBy;
         filtered.sort((a, b) => {
           if (sort === 'date-desc') return b.date.localeCompare(a.date);
@@ -2587,7 +2733,7 @@
 
       renderRoommatesUI() {
         const room = this.activeRoom;
-        document.getElementById('roommates-active-badge').textContent = `${room.members.length} Flatmates`;
+        document.getElementById('roommates-active-count').textContent = room.members.length;
 
         const options = room.members.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
         document.getElementById('select-payer').innerHTML = options;
@@ -2600,13 +2746,32 @@
           document.getElementById('select-pay-from').value = this.user.name;
         }
 
-        document.getElementById('roommates-chips-container').innerHTML = room.members.map(p => `
-          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--bg-card-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); font-size: 0.85rem;">
-            <div class="avatar-sm" style="width: 20px; height: 20px; font-size: 0.7rem;">${p.charAt(0)}</div>
-            <span>${escapeHTML(p)}</span>
-            <button style="border: none; background: none; color: var(--rose-debt); cursor: pointer; font-size: 0.8rem; margin-left: 2px;" onclick="App.removeRoommate('${escapeHTML(p)}')">✕</button>
-          </div>
-        `).join('');
+        // WhatsApp Group Style Member Card List
+        const isAdmin = room.adminUser === this.user.name;
+        document.getElementById('roommates-group-list').innerHTML = room.members.map(p => {
+          const isMemberAdmin = room.adminUser === p;
+          const isMe = this.user.name === p;
+
+          return `
+            <div class="member-item">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="avatar" style="width: 32px; height: 32px; font-size: 0.8rem; background: #0d9488;">${p.charAt(0)}</div>
+                <div>
+                  <strong>${escapeHTML(p)}</strong> ${isMe ? '<span style="color: var(--teal-primary); font-size: 0.72rem;">(You)</span>' : ''}
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">${isMemberAdmin ? '👑 Room Admin' : 'Member'}</div>
+                </div>
+              </div>
+
+              <div>
+                ${isAdmin && !isMe ? `
+                  <button class="btn btn-ghost btn-sm" style="color: var(--rose-debt);" onclick="App.removeRoommate('${escapeHTML(p)}')">
+                    Remove
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
       },
 
       renderSharersFormInputs() {
@@ -2692,12 +2857,13 @@
         document.getElementById('modal-room-manager').classList.add('open');
       },
 
-      selectRoom(roomId) {
+      async selectRoom(roomId) {
         RoomManager.setActiveRoomId(roomId);
         this.activeRoom = RoomManager.getRooms()[roomId];
         document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+        await this.syncActiveRoomFromCloud();
         this.renderAll();
-        showToast(`Switched to room: ${this.activeRoom.name}`);
+        showToast(`Switched to: ${this.activeRoom.name}`);
       },
 
       openQuickSettle(debtor, creditor, amountPaisa) {
@@ -2756,7 +2922,7 @@
             <div class="empty-state">
               <div class="empty-icon">✓</div>
               <strong>Audit Log Clean</strong>
-              <span style="font-size: 0.8rem;">No deleted entries in this room. Active ledger has 100% integrity.</span>
+              <span style="font-size: 0.8rem;">No deleted entries in this flat. Active ledger has 100% integrity.</span>
             </div>
           `;
         } else {
@@ -2809,6 +2975,7 @@
         });
 
         this.saveCurrentRoom();
+        CloudBridge.pushRoom(this.activeRoom);
         this.renderDashboard();
         this.renderEntries();
         showToast(`Moved "${entry.desc}" to Audit History.`);
@@ -2820,6 +2987,7 @@
         this.activeRoom.deletedEntries = this.activeRoom.deletedEntries.filter(e => String(e.id) !== String(id));
 
         this.saveCurrentRoom();
+        CloudBridge.pushRoom(this.activeRoom);
         this.openAuditModal();
         this.renderDashboard();
         this.renderEntries();
@@ -2890,16 +3058,14 @@
         RoomManager.saveRooms(rooms);
       },
 
-      removeRoommate(name) {
-        if (this.activeRoom.members.length <= 1) {
-          alert('Cannot remove the only flatmate in the room.');
-          return;
-        }
+      async removeRoommate(name) {
+        if (!confirm(`Remove "${name}" from this flat?`)) return;
         this.activeRoom.members = this.activeRoom.members.filter(m => m !== name);
         this.saveCurrentRoom();
+        await CloudBridge.pushRoom(this.activeRoom);
         this.renderRoommatesUI();
         this.renderDashboard();
-        showToast(`Removed "${name}" from room.`);
+        showToast(`Removed "${name}" from flat.`);
       },
 
       bindEvents() {
@@ -2931,13 +3097,13 @@
               if (!name.trim()) throw new Error('Please enter your full name.');
               const newUser = await AuthManager.register(name, user, pass);
               this.user = newUser;
-              showToast(`Welcome, ${name}!`);
+              showToast(`Account created! Welcome, ${name}!`);
             } else {
               const loggedUser = await AuthManager.login(user, pass);
               this.user = loggedUser;
               showToast(`Welcome back, ${loggedUser.name}!`);
             }
-            this.loadUserRoomsAndInit();
+            await this.loadUserRoomsAndInit();
           } catch(err) {
             alert(err.message);
           }
@@ -2981,39 +3147,84 @@
         });
 
         // Create Room Form
-        document.getElementById('form-create-room').addEventListener('submit', (e) => {
+        document.getElementById('form-create-room').addEventListener('submit', async (e) => {
           e.preventDefault();
           const name = document.getElementById('input-new-room-name').value;
           const code = document.getElementById('input-new-room-code').value;
+          const btn = document.getElementById('btn-submit-create-room');
+          btn.textContent = 'Creating...';
+          btn.disabled = true;
+
           try {
-            const newRoom = RoomManager.createRoom(name, code, this.user);
+            const newRoom = await RoomManager.createRoom(name, code, this.user);
             this.activeRoom = newRoom;
             document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
             this.renderAll();
-            showToast(`Room "${newRoom.name}" created!`);
+            showToast(`Flat "${newRoom.name}" created and synced to cloud!`);
           } catch(err) {
             alert(err.message);
+          } finally {
+            btn.textContent = 'Create New Flat';
+            btn.disabled = false;
           }
         });
 
-        // Join Room Form
-        document.getElementById('form-join-room').addEventListener('submit', (e) => {
+        // Join Room Form (Searches Cloud & Local)
+        document.getElementById('form-join-room').addEventListener('submit', async (e) => {
           e.preventDefault();
           const code = document.getElementById('input-join-code').value;
+          const btn = document.getElementById('btn-submit-join-room');
+          btn.textContent = 'Connecting...';
+          btn.disabled = true;
+
           try {
-            const room = RoomManager.joinRoom(code, this.user);
+            const room = await RoomManager.joinRoom(code, this.user);
             this.activeRoom = room;
             document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
             this.renderAll();
-            showToast(`Joined room "${room.name}"!`);
+            showToast(`✓ Joined flat "${room.name}"!`);
           } catch(err) {
             alert(err.message);
+          } finally {
+            btn.textContent = 'Join Flat';
+            btn.disabled = false;
           }
+        });
+
+        // Leave Room (WhatsApp-style Leave Group)
+        document.getElementById('btn-leave-room').addEventListener('click', async () => {
+          if (!confirm(`Are you sure you want to leave "${this.activeRoom.name}"? You will be removed from this flat's member list.`)) return;
+
+          await RoomManager.leaveRoom(this.activeRoom.id, this.user.name);
+          this.activeRoom = null;
+          showToast('Left room successfully.');
+          await this.loadUserRoomsAndInit();
+        });
+
+        // Toggle Mute Room
+        document.getElementById('btn-toggle-mute-room').addEventListener('click', () => {
+          if (!this.user.mutedRooms) this.user.mutedRooms = [];
+          const idx = this.user.mutedRooms.indexOf(this.activeRoom.id);
+          if (idx !== -1) {
+            this.user.mutedRooms.splice(idx, 1);
+            showToast('Unmuted flat notifications 🔔');
+          } else {
+            this.user.mutedRooms.push(this.activeRoom.id);
+            showToast('Muted flat notifications 🔕');
+          }
+          AuthManager.setSession(this.user);
+          const users = AuthManager.getUsers();
+          const u = users.find(x => x.id === this.user.id);
+          if (u) {
+            u.mutedRooms = this.user.mutedRooms;
+            AuthManager.saveUsers(users);
+          }
+          this.renderAll();
         });
 
         // Settle-to-Zero and Start Fresh Button
         document.getElementById('btn-close-cycle').addEventListener('click', () => {
-          const cycleName = prompt("Enter a name for this closed cycle (e.g., 'October 2026 Settlement' or 'Week 42 Settle'):", `Cycle ending ${new Date().toLocaleDateString('en-PK')}`);
+          const cycleName = prompt("Enter a name for this closed cycle (e.g., 'October 2026 Settle' or 'Week 42 Settle'):", `Period ending ${new Date().toLocaleDateString('en-PK')}`);
           if (!cycleName) return;
 
           RoomManager.closeCycleAndStartFresh(this.activeRoom.id, cycleName);
@@ -3030,7 +3241,7 @@
 
         document.getElementById('sort-balances').addEventListener('change', (e) => {
           this.sortBalancesBy = e.target.value;
-          const activeEntries = this.activeRoom.entries.filter(x => !x.isDeleted);
+          const activeEntries = (this.activeRoom.entries || []).filter(x => !x.isDeleted);
           const { balances, ledgers } = MathEngine.calculateBalances(this.activeRoom.members, activeEntries);
           this.renderBalances(balances, ledgers);
         });
@@ -3083,7 +3294,6 @@
           });
         });
 
-        // Split Mode Tabs
         document.querySelectorAll('.split-tab').forEach(tab => {
           tab.addEventListener('click', () => {
             document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
@@ -3106,7 +3316,7 @@
         document.getElementById('btn-cancel-edit').addEventListener('click', () => this.resetForm());
 
         // Submit Transaction
-        document.getElementById('transaction-form').addEventListener('submit', (e) => {
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const type = document.getElementById('btn-type-share').classList.contains('btn-primary') ? 'share' : 'pay';
           const amtPaisa = MathEngine.rupeesToPaisa(document.getElementById('input-amount').value);
@@ -3185,6 +3395,7 @@
           }
 
           this.saveCurrentRoom();
+          CloudBridge.pushRoom(this.activeRoom);
           this.resetForm();
           this.renderDashboard();
           this.renderEntries();
@@ -3215,27 +3426,29 @@
 
           this.activeRoom.entries.unshift(newEntry);
           this.saveCurrentRoom();
+          CloudBridge.pushRoom(this.activeRoom);
           document.getElementById('modal-settle-up').classList.remove('open');
           this.renderDashboard();
           this.renderEntries();
           showToast(`✓ Recorded settlement: ${debtor} paid ${creditor}!`);
         });
 
-        // Add Roommate to Flat
-        document.getElementById('add-roommate-form').addEventListener('submit', (e) => {
+        // Add Flatmate to Room
+        document.getElementById('add-roommate-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const name = document.getElementById('input-new-roommate').value.trim();
           if (!name) return;
           if (this.activeRoom.members.some(m => m.toLowerCase() === name.toLowerCase())) {
-            alert('Flatmate already exists in this room.');
+            alert('Flatmate already exists in this flat.');
             return;
           }
           this.activeRoom.members.push(name);
           this.saveCurrentRoom();
+          await CloudBridge.pushRoom(this.activeRoom);
           document.getElementById('input-new-roommate').value = '';
           this.renderRoommatesUI();
           this.renderDashboard();
-          showToast(`Added "${name}" to room!`);
+          showToast(`Added "${name}" to flat!`);
         });
 
         // Copy / Share Invite Link
@@ -3248,6 +3461,42 @@
           const link = document.getElementById('input-invite-link').value;
           const text = `*Join our Flat on Roomates Sheet* 🏠\nHey flatmates! Join our room *${this.activeRoom.name}* (Code: *${this.activeRoom.code}*) to log expenses and settle up:\n${link}`;
           window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+        });
+
+        // WhatsApp Summary
+        document.getElementById('btn-dash-whatsapp').addEventListener('click', () => {
+          const active = (this.activeRoom.entries || []).filter(e => !e.isDeleted);
+          const { balances } = MathEngine.calculateBalances(this.activeRoom.members, active);
+          const settlements = MathEngine.calculateSettlements(balances);
+
+          let msg = `*Roomates Sheet: ${this.activeRoom.name}* 🏠\n📅 ${new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
+          msg += `*Optimal Transfers (${settlements.length}):*\n`;
+          if (settlements.length === 0) {
+            msg += `🎉 All balances are settled up! Zero transfers needed.\n\n`;
+          } else {
+            settlements.forEach(s => {
+              msg += `👉 *${s.from}* pays *${s.to}*: ${MathEngine.formatPaisa(s.amount)}\n`;
+            });
+            msg += `\n`;
+          }
+
+          msg += `*Net Balances:*\n`;
+          for (const p of this.activeRoom.members) {
+            const bal = balances[p] || 0;
+            if (bal > 0) msg += `🟢 *${p}*: gets ${MathEngine.formatPaisa(bal)}\n`;
+            else if (bal < 0) msg += `🔴 *${p}*: owes ${MathEngine.formatPaisa(Math.abs(bal))}\n`;
+            else msg += `⚪ *${p}*: settled (Rs. 0.00)\n`;
+          }
+
+          msg += `\n_Generated with Roomates Sheet • Exact Paisa Math_`;
+          document.getElementById('whatsapp-preview-content').textContent = msg;
+          document.getElementById('btn-open-whatsapp-link').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+          document.getElementById('modal-whatsapp').classList.add('open');
+        });
+
+        document.getElementById('btn-copy-whatsapp').addEventListener('click', () => {
+          const text = document.getElementById('whatsapp-preview-content').textContent;
+          navigator.clipboard.writeText(text).then(() => showToast('Copied WhatsApp summary!'));
         });
 
         // Theme Toggle
